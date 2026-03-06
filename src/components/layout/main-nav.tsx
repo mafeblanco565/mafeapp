@@ -47,17 +47,16 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-20 items-center justify-between px-4">
-        {/* Logo agrandado a w-16 h-16 */}
+      <div className="container flex h-24 items-center justify-between px-4">
+        {/* Logo agrandado y sin texto al lado */}
         <Link href="/" className="flex items-center">
           {logoImage && (
-            <div className="relative w-16 h-16 overflow-hidden rounded-lg transition-transform hover:scale-105">
+            <div className="relative w-20 h-20 overflow-hidden rounded-lg transition-transform hover:scale-105">
               <Image
                 src={logoImage.imageUrl}
-                alt="MBFOCUS Logo"
+                alt="MBFOCUS"
                 fill
                 className="object-contain"
-                data-ai-hint={logoImage.imageHint}
                 priority
               />
             </div>
@@ -76,16 +75,16 @@ export function MainNav() {
             <SheetHeader className="mb-8 pt-4">
               <SheetTitle className="text-left flex items-center gap-3 text-primary font-bold uppercase tracking-tighter">
                 {logoImage && (
-                  <div className="relative w-10 h-10">
+                  <div className="relative w-12 h-12">
                     <Image
                       src={logoImage.imageUrl}
-                      alt="Mini Logo"
+                      alt="Logo"
                       fill
                       className="object-contain"
                     />
                   </div>
                 )}
-                MB FOCUS
+                MENU
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-2">

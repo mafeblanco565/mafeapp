@@ -18,6 +18,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { cn } from "@/lib/utils";
@@ -57,10 +58,17 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20 pt-4">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-5xl font-headline font-bold tracking-tighter text-primary uppercase">
-          MB FOCUS
-        </h1>
+      <div className="flex flex-col gap-4">
+        {/* Reemplazo de texto por Imagen 1.svg */}
+        <div className="relative w-64 h-24">
+          <Image 
+            src="/1.svg" 
+            alt="MB FOCUS" 
+            fill 
+            className="object-contain object-left" 
+            priority
+          />
+        </div>
         <p className="text-muted-foreground text-lg font-bold uppercase tracking-tight opacity-70">
           Productividad Inteligente para tu día a día.
         </p>
