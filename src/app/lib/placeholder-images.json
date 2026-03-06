@@ -1,10 +1,11 @@
+
 {
   "placeholderImages": [
     {
       "id": "app-logo",
       "description": "Logotipo oficial de MB FOCUS",
-      "imageUrl": "https://picsum.photos/seed/mb-focus-logo/200/200",
-      "imageHint": "modern logo"
+      "imageUrl": "https://picsum.photos/seed/mb-focus-brand/400/400",
+      "imageHint": "MB FOCUS logo"
     },
     {
       "id": "grocery-hero",
