@@ -48,47 +48,44 @@ export function MainNav() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo a la izquierda */}
-        <Link href="/" className="flex items-center gap-2">
+        {/* Logo a la izquierda - Sin texto MBFOCUS por solicitud del usuario */}
+        <Link href="/" className="flex items-center">
           {logoImage && (
-            <div className="relative w-10 h-10 overflow-hidden rounded-lg shadow-sm">
+            <div className="relative w-12 h-12 overflow-hidden rounded-lg transition-transform hover:scale-105">
               <Image
                 src={logoImage.imageUrl}
                 alt="MBFOCUS Logo"
                 fill
-                className="object-cover"
+                className="object-contain"
                 data-ai-hint={logoImage.imageHint}
+                priority
               />
             </div>
           )}
-          <span className="font-headline font-bold text-xl tracking-tighter text-primary uppercase">
-            MBFOCUS
-          </span>
         </Link>
 
-        {/* Hamburguesa a la derecha */}
+        {/* Menú Hamburguesa a la derecha */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:h-10 md:w-10">
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Abrir menú</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-            <SheetHeader className="mb-6">
-              <SheetTitle className="text-left flex items-center gap-2 text-primary">
+          <SheetContent side="right" className="w-[300px] border-none shadow-2xl rounded-l-[2rem]">
+            <SheetHeader className="mb-8 pt-4">
+              <SheetTitle className="text-left flex items-center gap-3 text-primary font-bold uppercase tracking-tighter">
                 {logoImage && (
-                  <div className="relative w-6 h-6 overflow-hidden rounded">
+                  <div className="relative w-8 h-8">
                     <Image
                       src={logoImage.imageUrl}
                       alt="Mini Logo"
                       fill
-                      className="object-cover"
-                      data-ai-hint={logoImage.imageHint}
+                      className="object-contain"
                     />
                   </div>
                 )}
-                Menú Principal
+                MB FOCUS
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-2">
@@ -101,9 +98,9 @@ export function MainNav() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                      "flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold uppercase tracking-tight transition-all",
                       isActive
-                        ? "bg-primary text-primary-foreground shadow-md"
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                         : "text-muted-foreground hover:bg-secondary hover:text-primary"
                     )}
                   >
@@ -112,16 +109,16 @@ export function MainNav() {
                   </Link>
                 );
               })}
-              <div className="my-4 border-t pt-4">
+              <div className="my-6 border-t pt-6 space-y-2">
                 <Link
                   href="/settings"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary transition-colors"
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold uppercase tracking-tight text-muted-foreground hover:bg-secondary transition-colors"
                 >
                   <Settings className="w-5 h-5" />
                   Configuración
                 </Link>
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors text-left">
+                <button className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-sm font-bold uppercase tracking-tight text-destructive hover:bg-destructive/5 transition-colors text-left">
                   <LogOut className="w-5 h-5" />
                   Cerrar Sesión
                 </button>

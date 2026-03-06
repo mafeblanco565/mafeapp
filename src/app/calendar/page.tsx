@@ -120,9 +120,9 @@ export default function CalendarPage() {
     setIsSheetOpen(true);
   };
 
-  const goToToday = () => setCurrentDate(new Date());
   const prevWeek = () => setCurrentDate(addDays(currentDate, -7));
   const nextWeek = () => setCurrentDate(addDays(currentDate, 7));
+  const goToToday = () => setCurrentDate(new Date());
 
   if (!mounted) return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -133,27 +133,27 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2 uppercase tracking-tighter">
+        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-3 uppercase tracking-tighter">
           <CalendarIcon className="w-8 h-8" />
           Agenda Semanal
         </h1>
-        <p className="text-muted-foreground text-sm font-bold uppercase opacity-60">Visualización de tus próximos objetivos.</p>
+        <p className="text-muted-foreground text-sm font-bold uppercase opacity-60">Tus objetivos sin complicaciones.</p>
       </div>
 
-      <div className="flex items-center justify-between bg-white p-4 rounded-[2rem] border shadow-sm">
+      <div className="flex items-center justify-between bg-white p-5 rounded-[2.5rem] border shadow-sm">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToToday} className="font-bold rounded-xl uppercase text-[10px] h-8">Hoy</Button>
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={prevWeek} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
-            <Button variant="ghost" size="icon" onClick={nextWeek} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
+          <Button variant="outline" size="sm" onClick={goToToday} className="font-bold rounded-2xl uppercase text-[10px] h-9 px-4">Hoy</Button>
+          <div className="flex items-center ml-2">
+            <Button variant="ghost" size="icon" onClick={prevWeek} className="h-9 w-9 rounded-full"><ChevronLeft className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" onClick={nextWeek} className="h-9 w-9 rounded-full"><ChevronRight className="h-5 w-5" /></Button>
           </div>
-          <h2 className="text-sm font-bold text-primary ml-2 uppercase tracking-tight">
+          <h2 className="text-sm font-bold text-primary ml-3 uppercase tracking-tight">
             {format(currentDate, "MMMM yyyy", { locale: es })}
           </h2>
         </div>
         <Link href="/tasks">
-          <Button size="sm" className="rounded-full gap-2 font-bold uppercase text-[10px] h-8 px-4">
-            <Plus className="w-3 h-3" /> Nueva Tarea
+          <Button size="sm" className="rounded-full gap-2 font-bold uppercase text-[10px] h-9 px-5 shadow-lg shadow-primary/20">
+            <Plus className="w-3.5 h-3.5" /> Nueva Tarea
           </Button>
         </Link>
       </div>
@@ -165,22 +165,22 @@ export default function CalendarPage() {
           
           return (
             <div key={i} className={cn(
-              "flex flex-col min-h-[160px] bg-white rounded-3xl border shadow-sm overflow-hidden transition-all",
-              isToday ? "ring-2 ring-primary ring-inset border-transparent shadow-lg" : "border-muted/30"
+              "flex flex-col min-h-[180px] bg-white rounded-[2.5rem] border shadow-sm overflow-hidden transition-all",
+              isToday ? "ring-2 ring-primary ring-inset border-transparent shadow-xl scale-[1.02] z-10" : "border-muted/30"
             )}>
               <div className={cn(
-                "p-3 border-b text-center",
+                "p-4 border-b text-center",
                 isToday ? "bg-primary text-white" : "bg-muted/5"
               )}>
-                <p className="text-[9px] font-bold uppercase opacity-80">{format(day, "eeee", { locale: es })}</p>
-                <p className="text-xl font-bold">{format(day, "d")}</p>
+                <p className="text-[9px] font-bold uppercase opacity-80 mb-1">{format(day, "eeee", { locale: es })}</p>
+                <p className="text-2xl font-bold tracking-tighter">{format(day, "d")}</p>
               </div>
               
-              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[300px]">
+              <div className="flex-1 p-3 space-y-2 overflow-y-auto max-h-[300px] scrollbar-hide">
                 {dayEvents.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full opacity-20 mt-4">
-                    <Info className="w-4 h-4" />
-                    <p className="text-[8px] font-bold uppercase mt-1">Sin planes</p>
+                  <div className="flex flex-col items-center justify-center h-full opacity-10 mt-2">
+                    <Info className="w-5 h-5" />
+                    <p className="text-[8px] font-bold uppercase mt-1">Vacío</p>
                   </div>
                 ) : (
                   dayEvents.map((event) => (
@@ -188,12 +188,12 @@ export default function CalendarPage() {
                       key={event.id}
                       onClick={() => handleEventClick(event)}
                       className={cn(
-                        "w-full text-left p-2 rounded-xl text-[9px] font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95",
+                        "w-full text-left p-2.5 rounded-2xl text-[9px] font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95",
                         event.color,
                         (event.isCompleted || event.isPaid) && "opacity-30 grayscale line-through"
                       )}
                     >
-                      <p className="line-clamp-2 leading-tight uppercase">{event.title}</p>
+                      <p className="line-clamp-2 leading-tight uppercase tracking-tight">{event.title}</p>
                     </button>
                   ))
                 )}
@@ -204,15 +204,19 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-[3rem] h-auto pb-10 border-none shadow-2xl">
+        <SheetContent side="bottom" className="rounded-t-[3.5rem] h-auto pb-12 border-none shadow-2xl">
           {selectedEvent ? (
-            <div className="max-w-md mx-auto space-y-8 pt-6">
+            <div className="max-w-md mx-auto space-y-8 pt-8 px-4">
               <SheetHeader>
-                <SheetTitle className="flex items-center gap-3 text-2xl font-bold uppercase tracking-tighter">
-                  <div className={cn("w-4 h-4 rounded-full shadow-inner", selectedEvent.color)} />
+                <div className="flex items-center gap-4 mb-2">
+                   <div className={cn("w-5 h-5 rounded-full shadow-inner ring-4 ring-offset-2", selectedEvent.color)} />
+                   <Badge className="rounded-lg uppercase font-bold text-[9px] tracking-widest">{selectedEvent.type}</Badge>
+                </div>
+                <SheetTitle className="text-3xl font-bold uppercase tracking-tighter leading-none">
                   {selectedEvent.title}
                 </SheetTitle>
-                <SheetDescription className="font-bold text-primary uppercase text-xs tracking-widest mt-2">
+                <SheetDescription className="font-bold text-primary uppercase text-xs tracking-widest mt-4 flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4" />
                   {selectedEvent.displayDate && format(selectedEvent.displayDate, "EEEE d 'de' MMMM", { locale: es })}
                 </SheetDescription>
               </SheetHeader>
@@ -220,7 +224,7 @@ export default function CalendarPage() {
               <div className="grid grid-cols-2 gap-4">
                 <Button 
                   variant="outline" 
-                  className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-2xl font-bold uppercase text-xs h-14"
+                  className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-3xl font-bold uppercase text-[10px] h-14"
                   onClick={() => {
                     const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
                     const docRef = doc(firestore!, "users", user!.uid, path, selectedEvent.id);
@@ -231,7 +235,7 @@ export default function CalendarPage() {
                   <Trash2 className="w-4 h-4 mr-2" /> Eliminar
                 </Button>
                 <Button 
-                  className="w-full rounded-2xl font-bold uppercase text-xs h-14 shadow-lg"
+                  className="w-full rounded-3xl font-bold uppercase text-[10px] h-14 shadow-xl shadow-primary/20"
                   onClick={() => {
                     const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
                     const docRef = doc(firestore!, "users", user!.uid, path, selectedEvent.id);
@@ -244,7 +248,7 @@ export default function CalendarPage() {
                   disabled={selectedEvent.isCompleted || selectedEvent.isPaid}
                 >
                   <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {selectedEvent.isCompleted || selectedEvent.isPaid ? "Completado" : "Marcar Hecho"}
+                  {selectedEvent.isCompleted || selectedEvent.isPaid ? "Hecho" : "Completar"}
                 </Button>
               </div>
             </div>
