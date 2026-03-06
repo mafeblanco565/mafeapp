@@ -3,7 +3,7 @@
     {
       "id": "app-logo",
       "description": "Logotipo oficial de MBFOCUS - Cerebro Tecnológico",
-      "imageUrl": "https://picsum.photos/seed/tech-brain-focus/400/400",
+      "imageUrl": "/3.svg",
       "imageHint": "tech brain logo"
     },
     {
