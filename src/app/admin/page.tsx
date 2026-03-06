@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,13 +29,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
 const data = [
-  { name: "Mon", users: 4000, interactions: 2400 },
-  { name: "Tue", users: 3000, interactions: 1398 },
-  { name: "Wed", users: 2000, interactions: 9800 },
-  { name: "Thu", users: 2780, interactions: 3908 },
-  { name: "Fri", users: 1890, interactions: 4800 },
-  { name: "Sat", users: 2390, interactions: 3800 },
-  { name: "Sun", users: 3490, interactions: 4300 },
+  { name: "Lun", users: 4000, interactions: 2400 },
+  { name: "Mar", users: 3000, interactions: 1398 },
+  { name: "Mié", users: 2000, interactions: 9800 },
+  { name: "Jue", users: 2780, interactions: 3908 },
+  { name: "Vie", users: 1890, interactions: 4800 },
+  { name: "Sáb", users: 2390, interactions: 3800 },
+  { name: "Dom", users: 3490, interactions: 4300 },
 ];
 
 export default function AdminDashboard() {
@@ -46,22 +45,22 @@ export default function AdminDashboard() {
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
             <ShieldCheck className="w-8 h-8" />
-            Admin Panel
+            Panel de Administración
           </h1>
-          <p className="text-muted-foreground">System health and user engagement analytics.</p>
+          <p className="text-muted-foreground">Estado del sistema y analíticas de usuario.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Download Report</Button>
-          <Button size="sm">System Reboot</Button>
+          <Button variant="outline" size="sm">Descargar Informe</Button>
+          <Button size="sm">Reiniciar Sistema</Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Users", value: "12,842", change: "+12%", icon: Users },
-          { label: "Active Now", value: "1,402", change: "+5%", icon: Activity },
-          { label: "Storage Used", value: "42.8 GB", change: "24%", icon: Database },
-          { label: "API Calls", value: "245k", change: "+18%", icon: MoreHorizontal },
+          { label: "Usuarios Totales", value: "12,842", change: "+12%", icon: Users },
+          { label: "Activos Ahora", value: "1,402", change: "+5%", icon: Activity },
+          { label: "Almacenamiento", value: "42.8 GB", change: "24%", icon: Database },
+          { label: "Llamadas API", value: "245k", change: "+18%", icon: MoreHorizontal },
         ].map((stat, i) => (
           <Card key={i}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -72,7 +71,7 @@ export default function AdminDashboard() {
               <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                 <ArrowUpRight className="w-3 h-3" />
-                {stat.change} <span className="text-muted-foreground ml-1">from last month</span>
+                {stat.change} <span className="text-muted-foreground ml-1">vs mes anterior</span>
               </p>
             </CardContent>
           </Card>
@@ -82,8 +81,8 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>User Interaction Trends</CardTitle>
-            <CardDescription>Daily active sessions and interactions.</CardDescription>
+            <CardTitle>Tendencias de Interacción</CardTitle>
+            <CardDescription>Sesiones e interacciones diarias activas.</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -99,6 +98,7 @@ export default function AdminDashboard() {
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  labelFormatter={(label) => `Día: ${label}`}
                 />
                 <Area type="monotone" dataKey="interactions" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorUsers)" />
               </AreaChart>
@@ -109,21 +109,21 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Recent Users</CardTitle>
-              <CardDescription>Monitor new registrations and status.</CardDescription>
+              <CardTitle>Usuarios Recientes</CardTitle>
+              <CardDescription>Monitoriza registros y estado.</CardDescription>
             </div>
             <div className="relative w-48">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search users..." className="pl-9 h-8 text-xs" />
+              <Input placeholder="Buscar usuarios..." className="pl-9 h-8 text-xs" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: "John Doe", email: "john@example.com", status: "Active", time: "2m ago" },
-                { name: "Jane Smith", email: "jane@gmail.com", status: "Offline", time: "15m ago" },
-                { name: "Robert Fox", email: "robert@outlook.com", status: "Active", time: "1h ago" },
-                { name: "Emily Brown", email: "emily@focus.ai", status: "Banned", time: "3h ago" },
+                { name: "Juan Pérez", email: "juan@example.com", status: "Activo", time: "hace 2m" },
+                { name: "Ana García", email: "ana@gmail.com", status: "Desconectado", time: "hace 15m" },
+                { name: "Roberto Fox", email: "robert@outlook.com", status: "Activo", time: "hace 1h" },
+                { name: "Emily Brown", email: "emily@focus.ai", status: "Baneado", time: "hace 3h" },
               ].map((user, i) => (
                 <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors">
                   <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Badge variant={user.status === "Active" ? "default" : user.status === "Banned" ? "destructive" : "secondary"}>
+                    <Badge variant={user.status === "Activo" ? "default" : user.status === "Baneado" ? "destructive" : "secondary"}>
                       {user.status}
                     </Badge>
                     <span className="text-[10px] text-muted-foreground font-bold">{user.time}</span>

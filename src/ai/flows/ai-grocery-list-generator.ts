@@ -1,25 +1,25 @@
 'use server';
 /**
- * @fileOverview A Genkit flow that generates a grocery list based on a user-provided theme or meal.
+ * @fileOverview Un flujo de Genkit que genera una lista de compras basada en un tema o comida proporcionado por el usuario.
  *
- * - generateGroceryList - A function that handles the grocery list generation process.
- * - GenerateGroceryListInput - The input type for the generateGroceryList function.
- * - GenerateGroceryListOutput - The return type for the generateGroceryList function.
+ * - generateGroceryList - Una función que maneja el proceso de generación de la lista de compras.
+ * - GenerateGroceryListInput - El tipo de entrada para la función generateGroceryList.
+ * - GenerateGroceryListOutput - El tipo de retorno para la función generateGroceryList.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateGroceryListInputSchema = z.object({
-  theme: z.string().describe('A theme or meal for which to generate a grocery list.'),
+  theme: z.string().describe('Un tema o comida para el cual generar una lista de compras.'),
 });
 export type GenerateGroceryListInput = z.infer<typeof GenerateGroceryListInputSchema>;
 
 const GenerateGroceryListOutputSchema = z.object({
   items: z.array(z.object({
-    name: z.string().describe('The name of the grocery item.'),
-    quantity: z.string().describe('The suggested quantity for the grocery item (e.g., "1 dozen", "500g", "1 head").'),
-  })).describe('A list of suggested grocery items with their quantities.'),
+    name: z.string().describe('El nombre del artículo de la compra.'),
+    quantity: z.string().describe('La cantidad sugerida para el artículo (ej. "1 docena", "500g", "1 unidad").'),
+  })).describe('Una lista de artículos de compra sugeridos con sus cantidades.'),
 });
 export type GenerateGroceryListOutput = z.infer<typeof GenerateGroceryListOutputSchema>;
 
@@ -27,19 +27,20 @@ const groceryListPrompt = ai.definePrompt({
   name: 'groceryListPrompt',
   input: {schema: GenerateGroceryListInputSchema},
   output: {schema: GenerateGroceryListOutputSchema},
-  prompt: `You are a helpful assistant that generates grocery lists.
-Based on the following theme or meal, generate a comprehensive grocery list with suggested quantities.
-The output should be a JSON object containing an array of items, where each item has a 'name' and 'quantity' field.
+  prompt: `Eres un asistente útil que genera listas de compras.
+Basándote en el siguiente tema o comida, genera una lista de compras completa con cantidades sugeridas.
+La salida debe ser un objeto JSON que contenga un array de artículos, donde cada artículo tiene un campo 'name' y un campo 'quantity'.
+IMPORTANTE: Todos los nombres de los artículos y las cantidades deben estar en ESPAÑOL.
 
-Theme/Meal: {{{theme}}}
+Tema/Comida: {{{theme}}}
 
-Example Output:
+Ejemplo de Salida:
 {
   "items": [
-    { "name": "Hot dogs", "quantity": "1 pack" },
-    { "name": "Hot dog buns", "quantity": "1 pack" },
-    { "name": "Ketchup", "quantity": "1 bottle" },
-    { "name": "Mustard", "quantity": "1 bottle" }
+    { "name": "Salchichas", "quantity": "1 paquete" },
+    { "name": "Pan de hot dog", "quantity": "1 paquete" },
+    { "name": "Ketchup", "quantity": "1 botella" },
+    { "name": "Mostaza", "quantity": "1 botella" }
   ]
 }
 `,

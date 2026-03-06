@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -18,13 +17,13 @@ import {
 } from "lucide-react";
 
 const items = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Grocery List", href: "/grocery", icon: ShoppingCart },
-  { name: "Tasks", href: "/tasks", icon: CheckSquare },
-  { name: "Bills", href: "/bills", icon: CreditCard },
-  { name: "Habits", href: "/habits", icon: Activity },
-  { name: "Calendar", href: "/calendar", icon: Calendar },
-  { name: "Notes", href: "/notes", icon: FileText },
+  { name: "Panel Control", href: "/", icon: LayoutDashboard },
+  { name: "Lista Compra", href: "/grocery", icon: ShoppingCart },
+  { name: "Tareas", href: "/tasks", icon: CheckSquare },
+  { name: "Facturas", href: "/bills", icon: CreditCard },
+  { name: "Hábitos", href: "/habits", icon: Activity },
+  { name: "Calendario", href: "/calendar", icon: Calendar },
+  { name: "Notas", href: "/notes", icon: FileText },
   { name: "Admin", href: "/admin", icon: ShieldCheck },
 ];
 
@@ -74,11 +73,11 @@ export function MainNav() {
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary transition-colors"
         >
           <Settings className="w-5 h-5" />
-          Settings
+          Ajustes
         </Link>
         <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors">
           <LogOut className="w-5 h-5" />
-          Logout
+          Cerrar Sesión
         </button>
       </div>
     </div>

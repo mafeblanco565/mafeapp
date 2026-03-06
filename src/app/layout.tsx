@@ -1,12 +1,11 @@
-
 import type { Metadata } from 'next';
 import './globals.css';
 import { MainNav } from '@/components/layout/main-nav';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'MB Focus - Ultimate Productivity',
-  description: 'Manage groceries, tasks, bills, and habits with AI-powered focus.',
+  title: 'MB Focus - Productividad Extrema',
+  description: 'Gestiona tus compras, tareas, facturas y hábitos con un enfoque impulsado por IA.',
 };
 
 export default function RootLayout({
@@ -15,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

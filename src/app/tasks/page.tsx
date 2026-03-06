@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -18,37 +17,38 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 type Task = {
   id: string;
   title: string;
-  priority: "High" | "Medium" | "Low";
+  priority: "Alta" | "Media" | "Baja";
   dueDate: Date;
   completed: boolean;
 };
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", title: "Complete project proposal", priority: "High", dueDate: new Date(), completed: false },
-    { id: "2", title: "Monthly review meeting", priority: "Medium", dueDate: new Date(), completed: true },
-    { id: "3", title: "Update documentation", priority: "Low", dueDate: new Date(Date.now() + 86400000), completed: false },
+    { id: "1", title: "Completar propuesta de proyecto", priority: "Alta", dueDate: new Date(), completed: false },
+    { id: "2", title: "Reunión de revisión mensual", priority: "Media", dueDate: new Date(), completed: true },
+    { id: "3", title: "Actualizar documentación", priority: "Baja", dueDate: new Date(Date.now() + 86400000), completed: false },
   ]);
 
   const priorityColors = {
-    High: "text-red-600 bg-red-50 border-red-100",
-    Medium: "text-orange-600 bg-orange-50 border-orange-100",
-    Low: "text-blue-600 bg-blue-50 border-blue-100",
+    Alta: "text-red-600 bg-red-50 border-red-100",
+    Media: "text-orange-600 bg-orange-50 border-orange-100",
+    Baja: "text-blue-600 bg-blue-50 border-blue-100",
   };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-headline font-bold text-primary">Tareas: Tasks</h1>
-          <p className="text-muted-foreground">Organize your goals and stay productive.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">Tareas</h1>
+          <p className="text-muted-foreground">Organiza tus metas y mantente productivo.</p>
         </div>
         <Button className="gap-2">
-          <Plus className="w-4 h-4" /> New Task
+          <Plus className="w-4 h-4" /> Nueva Tarea
         </Button>
       </div>
 
@@ -56,19 +56,19 @@ export default function TasksPage() {
         <div className="lg:col-span-1 space-y-4">
           <Card className="bg-primary/5 border-primary/10">
             <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-primary">Overview</CardTitle>
+              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-primary">Vista General</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-3 rounded-md bg-white border">
-                <span className="text-sm">Today's Goals</span>
+                <span className="text-sm">Metas de Hoy</span>
                 <span className="font-bold text-primary">4</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-md bg-white border">
-                <span className="text-sm">Overdue</span>
+                <span className="text-sm">Atrasadas</span>
                 <span className="font-bold text-destructive">2</span>
               </div>
               <div className="flex items-center justify-between p-3 rounded-md bg-white border">
-                <span className="text-sm">Completed Week</span>
+                <span className="text-sm">Completadas Semana</span>
                 <span className="font-bold text-green-600">24</span>
               </div>
             </CardContent>
@@ -79,10 +79,10 @@ export default function TasksPage() {
           <Tabs defaultValue="all" className="w-full">
             <div className="flex items-center justify-between mb-4">
               <TabsList>
-                <TabsTrigger value="all">All Tasks</TabsTrigger>
-                <TabsTrigger value="today">Due Today</TabsTrigger>
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
+                <TabsTrigger value="all">Todas</TabsTrigger>
+                <TabsTrigger value="today">Hoy</TabsTrigger>
+                <TabsTrigger value="upcoming">Próximas</TabsTrigger>
+                <TabsTrigger value="completed">Completadas</TabsTrigger>
               </TabsList>
             </div>
 
@@ -106,7 +106,7 @@ export default function TasksPage() {
                       <div className="flex items-center gap-4 mt-1">
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <CalendarIcon className="w-3 h-3" />
-                          {format(task.dueDate, "MMM d, yyyy")}
+                          {format(task.dueDate, "d 'de' MMM, yyyy", { locale: es })}
                         </span>
                         <span className={cn(
                           "text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase",

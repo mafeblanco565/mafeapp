@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,24 +6,24 @@ import { CheckCircle2, Plus, Flame, Award, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const habits = [
-  { id: "1", name: "Read 30 mins", streak: 5, days: [true, true, true, true, true, false, false] },
-  { id: "2", name: "Early Workout", streak: 12, days: [true, true, true, true, true, true, true] },
-  { id: "3", name: "No Sugar", streak: 3, days: [false, false, true, true, true, false, false] },
-  { id: "4", name: "Meditation", streak: 0, days: [false, false, false, false, false, false, false] },
+  { id: "1", name: "Leer 30 min", streak: 5, days: [true, true, true, true, true, false, false] },
+  { id: "2", name: "Ejercicio Temprano", streak: 12, days: [true, true, true, true, true, true, true] },
+  { id: "3", name: "Sin Azúcar", streak: 3, days: [false, false, true, true, true, false, false] },
+  { id: "4", name: "Meditación", streak: 0, days: [false, false, false, false, false, false, false] },
 ];
 
-const daysOfWeek = ["M", "T", "W", "T", "F", "S", "S"];
+const daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"];
 
 export default function HabitsPage() {
   return (
     <div className="space-y-8 animate-in zoom-in-95 duration-500">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-headline font-bold text-primary">Habits: Daily Progress</h1>
-          <p className="text-muted-foreground">Small steps lead to big changes.</p>
+          <h1 className="text-3xl font-headline font-bold text-primary">Hábitos: Progreso Diario</h1>
+          <p className="text-muted-foreground">Pequeños pasos llevan a grandes cambios.</p>
         </div>
         <Button className="gap-2 bg-primary">
-          <Plus className="w-4 h-4" /> New Habit
+          <Plus className="w-4 h-4" /> Nuevo Hábito
         </Button>
       </div>
 
@@ -34,8 +33,8 @@ export default function HabitsPage() {
             <Flame className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Best Streak</p>
-            <p className="text-2xl font-bold">12 Days</p>
+            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Mejor Racha</p>
+            <p className="text-2xl font-bold">12 Días</p>
           </div>
         </Card>
         <Card className="flex items-center p-6 gap-4 border-l-4 border-l-primary">
@@ -43,8 +42,8 @@ export default function HabitsPage() {
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Achievements</p>
-            <p className="text-2xl font-bold">8 Badges</p>
+            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Logros</p>
+            <p className="text-2xl font-bold">8 Medallas</p>
           </div>
         </Card>
         <Card className="flex items-center p-6 gap-4 border-l-4 border-l-accent">
@@ -52,8 +51,8 @@ export default function HabitsPage() {
             <Target className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Today's Focus</p>
-            <p className="text-2xl font-bold">2/4 Done</p>
+            <p className="text-sm text-muted-foreground font-medium uppercase tracking-tight">Enfoque de Hoy</p>
+            <p className="text-2xl font-bold">2/4 Hechos</p>
           </div>
         </Card>
       </div>
@@ -90,8 +89,8 @@ export default function HabitsPage() {
                   </div>
                 </div>
                 <div className="p-6 bg-secondary/30 flex flex-col justify-center items-center gap-3">
-                  <Button size="sm" className="w-full font-bold">Log Session</Button>
-                  <span className="text-[10px] text-muted-foreground uppercase font-bold">Last logged: 2h ago</span>
+                  <Button size="sm" className="w-full font-bold">Registrar Sesión</Button>
+                  <span className="text-[10px] text-muted-foreground uppercase font-bold">Último registro: hace 2h</span>
                 </div>
               </div>
             </CardContent>
