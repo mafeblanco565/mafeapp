@@ -57,10 +57,10 @@ export default function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-headline font-bold tracking-tight text-primary">
-          ¡Hola de nuevo!
+          Bienvenido a MBFOCUS
         </h1>
         <p className="text-muted-foreground text-lg">
-          Hoy es un gran día para avanzar en tus metas.
+          Tu centro de control personal para un día productivo.
         </p>
       </div>
 
@@ -126,7 +126,7 @@ export default function DashboardPage() {
              {pendingTasks === 0 ? (
                <div className="py-12 text-center text-muted-foreground bg-muted/5 rounded-xl border-2 border-dashed flex flex-col items-center gap-2">
                  <CheckCircle2 className="w-10 h-10 opacity-20" />
-                 <p className="font-medium">No hay tareas para hoy</p>
+                 <p className="font-medium">No hay tareas pendientes</p>
                  <Link href="/tasks">
                    <Button size="sm" variant="outline" className="mt-2">Crear nueva tarea</Button>
                  </Link>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             <Link href="/grocery">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
                 <ShoppingCart className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xs uppercase tracking-wider">Mercado IA</span>
+                <span className="font-bold text-xs uppercase tracking-wider">Compras IA</span>
               </Button>
             </Link>
             <Link href="/calendar">
@@ -166,13 +166,13 @@ export default function DashboardPage() {
             </Link>
             <Link href="/notes">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
-                <Zap className="w-6 h-6 text-primary" />
+                <FileText className="w-6 h-6 text-primary" />
                 <span className="font-bold text-xs uppercase tracking-wider">Mis Notas</span>
               </Button>
             </Link>
             <Link href="/habits">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
-                <Flame className="w-6 h-6 text-primary" />
+                <Activity className="w-6 h-6 text-primary" />
                 <span className="font-bold text-xs uppercase tracking-wider">Hábitos</span>
               </Button>
             </Link>

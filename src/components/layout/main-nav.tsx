@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -53,15 +54,15 @@ export function MainNav() {
             <div className="relative w-10 h-10 overflow-hidden rounded-lg shadow-sm">
               <Image
                 src={logoImage.imageUrl}
-                alt="MB FOCUS Logo"
+                alt="MBFOCUS Logo"
                 fill
                 className="object-cover"
                 data-ai-hint={logoImage.imageHint}
               />
             </div>
           )}
-          <span className="font-headline font-bold text-lg tracking-tight text-primary uppercase">
-            MB FOCUS
+          <span className="font-headline font-bold text-xl tracking-tighter text-primary uppercase">
+            MBFOCUS
           </span>
         </Link>
 
@@ -87,7 +88,7 @@ export function MainNav() {
                     />
                   </div>
                 )}
-                Módulos
+                Menú Principal
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-2">
@@ -118,7 +119,7 @@ export function MainNav() {
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-secondary hover:text-primary transition-colors"
                 >
                   <Settings className="w-5 h-5" />
-                  Ajustes
+                  Configuración
                 </Link>
                 <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors text-left">
                   <LogOut className="w-5 h-5" />

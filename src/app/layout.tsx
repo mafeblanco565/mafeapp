@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { MainNav } from '@/components/layout/main-nav';
@@ -6,8 +7,8 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import { AuthCheck } from '@/components/auth-check';
 
 export const metadata: Metadata = {
-  title: 'MB FOCUS - Productividad Móvil',
-  description: 'Gestiona tu vida desde cualquier lugar con MB FOCUS AI.',
+  title: 'MBFOCUS - Productividad Inteligente',
+  description: 'Gestiona tu vida y tus metas con la inteligencia de MBFOCUS.',
 };
 
 export default function RootLayout({

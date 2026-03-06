@@ -3,9 +3,9 @@
   "placeholderImages": [
     {
       "id": "app-logo",
-      "description": "Logotipo oficial de MB FOCUS",
-      "imageUrl": "https://picsum.photos/seed/mb-focus-brand/400/400",
-      "imageHint": "MB FOCUS logo"
+      "description": "Logotipo oficial de MBFOCUS con icono de cerebro tecnológico",
+      "imageUrl": "https://picsum.photos/seed/mbfocus-brain-logo/400/400",
+      "imageHint": "tech brain logo"
     },
     {
       "id": "grocery-hero",
