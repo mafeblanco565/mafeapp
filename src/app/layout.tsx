@@ -5,8 +5,8 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'Focus - Productividad Móvil',
-  description: 'Gestiona tu vida desde cualquier lugar con Focus AI.',
+  title: 'MB FOCUS - Productividad Móvil',
+  description: 'Gestiona tu vida desde cualquier lugar con MB FOCUS AI.',
 };
 
 export default function RootLayout({
@@ -34,7 +34,7 @@ export default function RootLayout({
                 <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
                   <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
                 </div>
-                <span className="font-bold text-primary tracking-tight uppercase">Focus</span>
+                <span className="font-bold text-primary tracking-tight uppercase">MB FOCUS</span>
              </div>
           </div>
 

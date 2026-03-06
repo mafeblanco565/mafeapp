@@ -41,7 +41,7 @@ export function MainNav() {
             </div>
           </div>
           <span className="font-headline font-bold text-xl tracking-tight text-primary uppercase">
-            Focus
+            MB FOCUS
           </span>
         </div>
 
