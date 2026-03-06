@@ -7,13 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   CheckCircle2, 
-  ArrowRight, 
   Flame, 
   Zap, 
   DollarSign,
   ShoppingCart,
   Calendar as CalendarIcon,
-  Plus,
   Loader2,
   FileText,
   Activity
@@ -58,7 +56,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-headline font-bold tracking-tight text-primary">
+        <h1 className="text-4xl font-headline font-bold tracking-tight text-primary uppercase">
           Bienvenido a MBFOCUS
         </h1>
         <p className="text-muted-foreground text-lg">
@@ -67,80 +65,80 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Tareas Hoy</CardTitle>
             <CheckCircle2 className="w-5 h-5 text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{pendingTasks}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Pendientes de completar</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-bold">Pendientes de completar</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-accent shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-accent shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Finanzas</CardTitle>
             <DollarSign className="w-5 h-5 text-accent" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">${pendingBills.toLocaleString()}</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Total por pagar</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-bold">Total por pagar</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Racha</CardTitle>
             <Flame className="w-5 h-5 text-orange-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">Activa</div>
-            <p className="text-[10px] text-muted-foreground mt-1">¡Sigue construyendo hábitos!</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-bold">¡Sigue construyendo hábitos!</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Calendario</CardTitle>
             <CalendarIcon className="w-5 h-5 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">Activo</div>
-            <p className="text-[10px] text-muted-foreground mt-1">Revisa tu agenda</p>
+            <p className="text-[10px] text-muted-foreground mt-1 font-bold">Revisa tu agenda</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden bg-white border-none shadow-sm rounded-3xl">
           <CardHeader className="bg-secondary/30 flex flex-row items-center justify-between border-b">
-            <CardTitle className="text-lg font-headline font-bold text-primary flex items-center gap-2">
+            <CardTitle className="text-lg font-headline font-bold text-primary flex items-center gap-2 uppercase">
               <Zap className="w-5 h-5" /> Tareas Urgentes
             </CardTitle>
             <Link href="/tasks">
-              <Button variant="link" size="sm" className="text-primary font-bold">
+              <Button variant="link" size="sm" className="text-primary font-bold uppercase text-xs">
                 Ver todas
               </Button>
             </Link>
           </CardHeader>
           <CardContent className="pt-6 space-y-4">
              {pendingTasks === 0 ? (
-               <div className="py-12 text-center text-muted-foreground bg-muted/5 rounded-xl border-2 border-dashed flex flex-col items-center gap-2">
+               <div className="py-12 text-center text-muted-foreground bg-muted/5 rounded-2xl border-2 border-dashed flex flex-col items-center gap-2">
                  <CheckCircle2 className="w-10 h-10 opacity-20" />
-                 <p className="font-medium">No hay tareas pendientes</p>
+                 <p className="font-bold text-sm">No hay tareas pendientes</p>
                  <Link href="/tasks">
-                   <Button size="sm" variant="outline" className="mt-2">Crear nueva tarea</Button>
+                   <Button size="sm" variant="outline" className="mt-2 rounded-xl font-bold">CREAR NUEVA</Button>
                  </Link>
                </div>
              ) : (
                tasks?.filter((t: any) => !t.isCompleted).slice(0, 4).map((task: any) => (
-                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl border bg-card hover:bg-secondary/20 transition-all group">
+                <div key={task.id} className="flex items-center justify-between p-4 rounded-2xl border bg-card hover:bg-secondary/20 transition-all group">
                   <div className="flex items-center gap-3">
                     <div className={`w-2 h-2 rounded-full ${task.priority === 'Alta' ? 'bg-red-500' : 'bg-orange-400'}`} />
-                    <span className="font-medium group-hover:text-primary transition-colors">{task.title}</span>
+                    <span className="font-bold text-sm group-hover:text-primary transition-colors">{task.title}</span>
                   </div>
-                  <Badge variant="outline" className="text-[10px] font-bold uppercase">
+                  <Badge variant="outline" className="text-[10px] font-bold uppercase rounded-lg">
                     {task.priority}
                   </Badge>
                 </div>
@@ -149,33 +147,33 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white border-none shadow-sm rounded-3xl">
           <CardHeader className="border-b">
-            <CardTitle className="text-lg font-headline font-bold">Accesos Rápidos</CardTitle>
+            <CardTitle className="text-lg font-headline font-bold uppercase">Accesos Rápidos</CardTitle>
           </CardHeader>
           <CardContent className="pt-6 grid grid-cols-2 gap-4">
             <Link href="/grocery">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
                 <ShoppingCart className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xs uppercase tracking-wider">Compras IA</span>
+                <span className="font-bold text-[10px] uppercase tracking-wider">Compras IA</span>
               </Button>
             </Link>
             <Link href="/calendar">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
                 <CalendarIcon className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xs uppercase tracking-wider">Mi Agenda</span>
+                <span className="font-bold text-[10px] uppercase tracking-wider">Mi Agenda</span>
               </Button>
             </Link>
             <Link href="/notes">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
                 <FileText className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xs uppercase tracking-wider">Mis Notas</span>
+                <span className="font-bold text-[10px] uppercase tracking-wider">Mis Notas</span>
               </Button>
             </Link>
             <Link href="/habits">
               <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
                 <Activity className="w-6 h-6 text-primary" />
-                <span className="font-bold text-xs uppercase tracking-wider">Hábitos</span>
+                <span className="font-bold text-[10px] uppercase tracking-wider">Hábitos</span>
               </Button>
             </Link>
           </CardContent>

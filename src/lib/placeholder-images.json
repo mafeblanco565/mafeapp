@@ -2,20 +2,20 @@
   "placeholderImages": [
     {
       "id": "app-logo",
-      "description": "Logotipo oficial de MB FOCUS",
-      "imageUrl": "https://picsum.photos/seed/mb-focus-logo/200/200",
-      "imageHint": "modern logo"
+      "description": "Logotipo oficial de MBFOCUS - Cerebro Tecnológico",
+      "imageUrl": "https://picsum.photos/seed/tech-brain-focus/400/400",
+      "imageHint": "tech brain logo"
     },
     {
       "id": "grocery-hero",
-      "description": "Fresh produce and grocery items",
-      "imageUrl": "https://picsum.photos/seed/grocery1/800/400",
+      "description": "Ingredientes frescos y mercado",
+      "imageUrl": "https://picsum.photos/seed/grocery-market/800/400",
       "imageHint": "fresh vegetables"
     },
     {
       "id": "notes-abstract",
-      "description": "Minimalist paper and pen setup",
-      "imageUrl": "https://picsum.photos/seed/notes2/400/300",
+      "description": "Escritorio minimalista con notas",
+      "imageUrl": "https://picsum.photos/seed/notes-writing/400/300",
       "imageHint": "writing notebook"
     }
   ]
