@@ -47,11 +47,11 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo a la izquierda - Sin texto MBFOCUS por solicitud del usuario */}
+      <div className="container flex h-20 items-center justify-between px-4">
+        {/* Logo agrandado a w-16 h-16 */}
         <Link href="/" className="flex items-center">
           {logoImage && (
-            <div className="relative w-12 h-12 overflow-hidden rounded-lg transition-transform hover:scale-105">
+            <div className="relative w-16 h-16 overflow-hidden rounded-lg transition-transform hover:scale-105">
               <Image
                 src={logoImage.imageUrl}
                 alt="MBFOCUS Logo"
@@ -64,11 +64,11 @@ export function MainNav() {
           )}
         </Link>
 
-        {/* Menú Hamburguesa a la derecha */}
+        {/* Menú Hamburguesa */}
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/5">
-              <Menu className="h-6 w-6" />
+            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-full hover:bg-primary/5">
+              <Menu className="h-8 w-8" />
               <span className="sr-only">Abrir menú</span>
             </Button>
           </SheetTrigger>
@@ -76,7 +76,7 @@ export function MainNav() {
             <SheetHeader className="mb-8 pt-4">
               <SheetTitle className="text-left flex items-center gap-3 text-primary font-bold uppercase tracking-tighter">
                 {logoImage && (
-                  <div className="relative w-8 h-8">
+                  <div className="relative w-10 h-10">
                     <Image
                       src={logoImage.imageUrl}
                       alt="Mini Logo"
