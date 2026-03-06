@@ -102,14 +102,14 @@ export default function GroceryPage() {
       }
 
       toast({
-        title: "Sugerencias IA Añadidas",
-        description: `Se han añadido ${result.items.length} artículos basados en "${aiTheme}"`,
+        title: "Sugerencias listas",
+        description: `Añadidos artículos para "${aiTheme}"`,
       });
       setAiTheme("");
     } catch (error) {
       toast({
-        title: "Error en Generación IA",
-        description: "No se pudieron obtener sugerencias. Por favor, inténtalo de nuevo.",
+        title: "Error IA",
+        description: "Inténtalo de nuevo en unos momentos.",
         variant: "destructive",
       });
     } finally {
@@ -126,39 +126,39 @@ export default function GroceryPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
-      <div className="flex flex-col gap-2">
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
+      <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
           <ShoppingCart className="w-8 h-8" />
-          Mercado: Lista de Compra
+          Compras
         </h1>
-        <p className="text-muted-foreground">Gestiona tus compras eficientemente con asistencia de IA.</p>
+        <p className="text-muted-foreground text-sm">Organiza tu lista de mercado fácilmente.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Añadir Nuevo Artículo</CardTitle>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-md">Nuevo Artículo</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Input 
-                  placeholder="Nombre del artículo (ej. Aguacate)" 
-                  className="flex-1 min-w-[200px]"
+                  placeholder="Ej. Manzanas" 
+                  className="flex-1 min-w-[150px]"
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
                 />
                 <Input 
-                  placeholder="Cant. (ej. 2 piezas)" 
-                  className="w-32"
+                  placeholder="Cantidad" 
+                  className="w-24"
                   value={newQuantity}
                   onChange={(e) => setNewQuantity(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
                 />
-                <Button onClick={addItem} className="gap-2">
-                  <Plus className="w-4 h-4" /> Añadir
+                <Button onClick={addItem} size="icon" className="shrink-0">
+                  <Plus className="w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
@@ -167,50 +167,49 @@ export default function GroceryPage() {
           <Card>
             <CardContent className="p-0">
               <div className="divide-y">
-                {isLoading && (
+                {isLoading ? (
                   <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando lista...
+                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando...
                   </div>
-                )}
-                {!isLoading && items?.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground bg-muted/5">
-                    <p className="font-medium text-sm">Tu lista de compra está vacía.</p>
-                    <p className="text-xs mt-1">¡Empieza a añadir artículos o usa sugerencias de IA!</p>
+                ) : !items || items.length === 0 ? (
+                  <div className="p-12 text-center text-muted-foreground bg-muted/5">
+                    <p className="text-sm">Lista vacía. ¡Añade algo!</p>
                   </div>
-                )}
-                {items?.map((item: any) => (
-                  <div 
-                    key={item.id} 
-                    className={cn(
-                      "flex items-center gap-4 p-4 transition-colors group",
-                      item.isPurchased ? "bg-muted/30" : "hover:bg-secondary/20"
-                    )}
-                  >
-                    <Checkbox 
-                      id={item.id}
-                      checked={item.isPurchased} 
-                      onCheckedChange={() => toggleItem(item.id, item.isPurchased)}
-                      className="w-5 h-5"
-                    />
-                    <div className="flex-1 cursor-pointer" onClick={() => toggleItem(item.id, item.isPurchased)}>
-                      <p className={cn(
-                        "font-medium text-sm",
-                        item.isPurchased && "line-through text-muted-foreground"
-                      )}>
-                        {item.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{item.quantity}</p>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
-                      onClick={() => removeItem(item.id)}
+                ) : (
+                  items.map((item: any) => (
+                    <div 
+                      key={item.id} 
+                      className={cn(
+                        "flex items-center gap-4 p-4 transition-colors group",
+                        item.isPurchased ? "bg-muted/30" : "hover:bg-secondary/20"
+                      )}
                     >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
+                      <Checkbox 
+                        id={item.id}
+                        checked={item.isPurchased} 
+                        onCheckedChange={() => toggleItem(item.id, item.isPurchased)}
+                        className="w-5 h-5"
+                      />
+                      <div className="flex-1 cursor-pointer" onClick={() => toggleItem(item.id, item.isPurchased)}>
+                        <p className={cn(
+                          "font-medium text-sm",
+                          item.isPurchased && "line-through text-muted-foreground"
+                        )}>
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">{item.quantity}</p>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -218,52 +217,27 @@ export default function GroceryPage() {
 
         <div className="space-y-4">
           <Card className="border-accent/20 bg-accent/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent text-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-accent text-md">
                 <Sparkles className="w-5 h-5" />
-                Asistente IA
+                Sugerencias IA
               </CardTitle>
-              <CardDescription>
-                ¿Sin ideas? Deja que la IA sugiera tu lista.
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase text-muted-foreground">Tema o Comida</label>
-                <Input 
-                  value={aiTheme} 
-                  onChange={(e) => setAiTheme(e.target.value)}
-                  placeholder="ej. Pasta Bolognesa" 
-                />
-              </div>
+              <Input 
+                value={aiTheme} 
+                onChange={(e) => setAiTheme(e.target.value)}
+                placeholder="Ej. Desayuno Saludable" 
+                className="text-sm"
+              />
               <Button 
                 onClick={handleAiSuggest} 
-                className="w-full bg-accent hover:bg-accent/90 gap-2"
+                className="w-full bg-accent hover:bg-accent/90 gap-2 font-bold"
                 disabled={isAiLoading || !aiTheme.trim()}
               >
-                {isAiLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                Sugerir con IA
+                {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Generar
               </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider">Estadísticas</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Artículos:</span>
-                <span className="font-bold">{items?.length || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Comprados:</span>
-                <span className="font-bold text-green-600">{items?.filter((i: any) => i.isPurchased).length || 0}</span>
-              </div>
             </CardContent>
           </Card>
         </div>

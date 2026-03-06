@@ -10,7 +10,8 @@ import {
   Plus,
   Loader2,
   Clock,
-  Trash2
+  Trash2,
+  CheckCircle2
 } from "lucide-react";
 import { 
   format, 
@@ -18,10 +19,7 @@ import {
   addDays, 
   isSameDay,
   parseISO,
-  isValid,
-  startOfMonth,
-  endOfMonth,
-  eachDayOfInterval
+  isValid
 } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -114,8 +112,6 @@ export default function CalendarPage() {
     return events;
   }, [tasks, bills]);
 
-  const monthName = mounted ? format(currentDate, "MMMM yyyy", { locale: es }) : "";
-
   const handleEventClick = (event: any) => {
     setSelectedEvent(event);
     setIsSheetOpen(true);
@@ -152,9 +148,9 @@ export default function CalendarPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
           <CalendarIcon className="w-8 h-8" />
-          Mi Agenda
+          Agenda
         </h1>
-        <p className="text-muted-foreground">Vista semanal de tus compromisos.</p>
+        <p className="text-muted-foreground text-sm">Vista simplificada de tus compromisos semanales.</p>
       </div>
 
       <div className="flex items-center justify-between bg-white p-4 rounded-2xl border shadow-sm">
@@ -164,50 +160,50 @@ export default function CalendarPage() {
             <Button variant="ghost" size="icon" onClick={prevWeek}><ChevronLeft className="h-5 w-5" /></Button>
             <Button variant="ghost" size="icon" onClick={nextWeek}><ChevronRight className="h-5 w-5" /></Button>
           </div>
-          <h2 className="text-lg font-bold text-primary ml-2 uppercase tracking-tight">
-            {monthName}
+          <h2 className="text-md font-bold text-primary ml-2 uppercase tracking-tight">
+            {format(currentDate, "MMMM yyyy", { locale: es })}
           </h2>
         </div>
         <Link href="/tasks">
           <Button size="sm" className="rounded-full gap-2">
-            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Añadir Tarea</span>
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Nueva Tarea</span>
           </Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
         {weekDays.map((day, i) => {
           const dayEvents = calendarEvents.filter(event => isSameDay(event.date, day));
           const isToday = isSameDay(day, new Date());
           
           return (
             <div key={i} className={cn(
-              "flex flex-col min-h-[200px] bg-white rounded-2xl border shadow-sm overflow-hidden transition-all",
+              "flex flex-col min-h-[160px] bg-white rounded-xl border shadow-sm overflow-hidden transition-all",
               isToday ? "ring-2 ring-primary ring-inset" : ""
             )}>
               <div className={cn(
-                "p-3 border-b text-center",
+                "p-2 border-b text-center",
                 isToday ? "bg-primary text-white" : "bg-muted/10"
               )}>
                 <p className="text-[10px] font-bold uppercase opacity-80">{format(day, "eee", { locale: es })}</p>
-                <p className="text-xl font-bold">{format(day, "d")}</p>
+                <p className="text-lg font-bold">{format(day, "d")}</p>
               </div>
               
-              <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[300px]">
+              <div className="flex-1 p-2 space-y-1 overflow-y-auto max-h-[250px]">
                 {dayEvents.length === 0 ? (
-                  <p className="text-[10px] text-center text-muted-foreground mt-4 italic">Sin eventos</p>
+                  <p className="text-[9px] text-center text-muted-foreground mt-4 italic">Vacío</p>
                 ) : (
                   dayEvents.map((event) => (
                     <div
                       key={event.id}
                       onClick={() => handleEventClick(event)}
                       className={cn(
-                        "p-2 rounded-xl text-[10px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02]",
-                        event.color
+                        "p-1.5 rounded-lg text-[10px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02]",
+                        event.color,
+                        event.isCompleted || event.isPaid ? "opacity-50 line-through" : ""
                       )}
                     >
                       <p className="truncate">{event.title}</p>
-                      <p className="text-[8px] opacity-80 mt-1">{format(event.date, 'HH:mm')}</p>
                     </div>
                   ))
                 )}
@@ -218,55 +214,43 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-3xl h-[60vh]">
+        <SheetContent side="bottom" className="rounded-t-3xl h-[50vh]">
           {selectedEvent ? (
             <div className="max-w-md mx-auto">
               <SheetHeader>
-                <SheetTitle className="flex items-center gap-2 text-2xl font-bold">
-                  <div className={cn("w-4 h-4 rounded-full", selectedEvent.color)} />
+                <SheetTitle className="flex items-center gap-2 text-xl font-bold">
+                  <div className={cn("w-3 h-3 rounded-full", selectedEvent.color)} />
                   {selectedEvent.title}
                 </SheetTitle>
                 <SheetDescription>
-                  Detalles del evento programado
+                  Programado para el {selectedEvent.date && format(selectedEvent.date, "d 'de' MMMM", { locale: es })}
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="py-8 space-y-6">
-                <div className="flex items-center gap-4 text-sm bg-muted/30 p-4 rounded-2xl">
-                  <div className="p-2 bg-white rounded-full shadow-sm">
-                    <Clock className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="font-bold">Horario</p>
-                    <p className="text-muted-foreground">
-                      {selectedEvent.date && format(selectedEvent.date, "PPPP 'a las' p", { locale: es })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              <div className="py-6 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   <Button 
                     variant="outline" 
-                    className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-xl h-12 font-bold"
+                    className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-xl font-bold"
                     onClick={handleDeleteEvent}
                   >
-                    <Trash2 className="w-4 h-4 mr-2" /> Eliminar
+                    <Trash2 className="w-4 h-4 mr-2" /> Borrar
                   </Button>
                   {selectedEvent.type === 'task' ? (
                     <Button 
-                      className="w-full rounded-xl h-12 font-bold"
+                      className="w-full rounded-xl font-bold"
                       onClick={() => handleUpdateStatus('Completada')}
-                      disabled={selectedEvent.status === 'Completada'}
+                      disabled={selectedEvent.isCompleted}
                     >
-                      Completada
+                      {selectedEvent.isCompleted ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Completar"}
                     </Button>
                   ) : (
                     <Button 
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl h-12 font-bold"
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold"
                       onClick={() => handleUpdateStatus('Pagado')}
-                      disabled={selectedEvent.paymentStatus === 'Pagado'}
+                      disabled={selectedEvent.isPaid}
                     >
-                      Pagada
+                      {selectedEvent.isPaid ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Pagar"}
                     </Button>
                   )}
                 </div>
