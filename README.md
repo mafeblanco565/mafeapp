@@ -1,44 +1,46 @@
 
-# MB FOCUS - Productividad Móvil con IA
+# 📱 MB FOCUS - Guía de Inicio Rápido
 
-**MB FOCUS** es una aplicación de productividad minimalista diseñada específicamente para dispositivos móviles. Centraliza la gestión de tu vida diaria integrando tareas, finanzas, hábitos y notas en una interfaz profesional y fluida.
+¡Bienvenido a tu nueva aplicación de productividad! Esta guía está diseñada para ayudarte a poner tu app en internet (GitHub y Vercel) incluso si no sabes nada de código.
 
-## 🚀 Características Principales
+## 🚀 Paso 1: Subir tu app a GitHub (Tu copia de seguridad)
 
-- **Dashboard Inteligente**: Un vistazo rápido a tus tareas pendientes y facturas por pagar.
-- **Agenda Semanal**: Calendario visual estilo profesional con bloques de tiempo para una organización precisa.
-- **IA Grocery Assistant**: Genera listas de compras temáticas (ej. "Cena Italiana") usando Google Genkit y Gemini.
-- **Gestión Financiera**: Seguimiento de facturas y fechas de vencimiento.
-- **Tracker de Hábitos**: Sistema diario para construir disciplina.
-- **Notas Rápidas**: Captura inspiración al instante.
+GitHub es donde guardaremos tu código de forma segura.
 
-## 🛠️ Tecnologías
-
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
-- **Base de Datos & Auth**: [Firebase](https://firebase.google.com/) (Firestore & Authentication)
-- **IA**: [Google Genkit](https://firebase.google.com/docs/genkit) con Gemini 2.5 Flash.
-- **UI/UX**: [Tailwind CSS](https://tailwindcss.com/) + [Shadcn/UI](https://ui.shadcn.com/) + [Lucide Icons](https://lucide.dev/).
-
-## 📱 Optimización Móvil
-
-La aplicación utiliza un enfoque **Mobile-First** con navegación por menú de hamburguesa superior y controles accesibles para el uso con una sola mano.
-
-## 🚀 Despliegue en Vercel
-
-1. **Sube tu código a GitHub**.
-2. **Conecta tu repositorio en Vercel**: Ve a [Vercel](https://vercel.com/) e importa tu proyecto.
-3. **Variables de Entorno**: Asegúrate de añadir las siguientes variables en el panel de Vercel si decides no usar el archivo `src/firebase/config.ts` directamente:
-   - `GOOGLE_GENAI_API_KEY`: Tu clave de API para Gemini.
-4. **Build Settings**: Vercel detectará automáticamente que es un proyecto de Next.js.
-
-## 📦 Desarrollo Local
-
-1. **Instalar dependencias:**
+1. **Crea una cuenta**: Ve a [github.com](https://github.com) y regístrate.
+2. **Crea un repositorio nuevo**: 
+   - Haz clic en el botón **"+"** arriba a la derecha -> **"New repository"**.
+   - Nombre: `mb-focus-app`.
+   - **No marques ninguna casilla** (ni README, ni .gitignore).
+   - Haz clic en **"Create repository"**.
+3. **Copia los comandos**: En la terminal de este editor, pega estos comandos uno a uno (sustituyendo la URL por la que te dé GitHub):
    ```bash
-   npm install
+   git init
+   git add .
+   git commit -m "Versión inicial"
+   git branch -M main
+   git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
+   git push -u origin main
    ```
 
-2. **Ejecutar en desarrollo:**
-   ```bash
-   npm run dev
-   ```
+## 🌐 Paso 2: Publicar en Vercel (Para usarla en tu móvil)
+
+Vercel hará que tu app tenga una dirección web (como `tu-app.vercel.app`) para que puedas entrar desde tu celular.
+
+1. **Entra en Vercel**: Ve a [vercel.com](https://vercel.com) e inicia sesión con tu cuenta de GitHub.
+2. **Importar Proyecto**:
+   - Haz clic en **"Add New"** -> **"Project"**.
+   - Verás tu repositorio de GitHub `mb-focus-app`. Dale a **"Import"**.
+3. **Configuración**:
+   - No toques nada en la configuración del proyecto, Vercel detecta que es Next.js automáticamente.
+   - **IMPORTANTE**: En la sección **"Environment Variables"**, añade una variable:
+     - Key: `GOOGLE_GENAI_API_KEY`
+     - Value: (Tu clave de API de Google Gemini para que funcione la IA).
+4. **Deploy**: Haz clic en el botón azul **"Deploy"**.
+5. ¡Listo! En 2 minutos tendrás un link para abrir tu app en el móvil.
+
+## 🛠️ Tecnologías Usadas
+- **Next.js**: El motor de la app.
+- **Firebase**: La base de datos donde se guardan tus tareas y notas.
+- **Genkit/Gemini**: La inteligencia artificial que genera tus listas de compra.
+- **Tailwind/Shadcn**: Lo que hace que la app se vea bonita y moderna.
