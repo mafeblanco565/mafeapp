@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -14,8 +15,7 @@ import {
   ShieldCheck,
   Settings,
   LogOut,
-  Menu,
-  X
+  Menu
 } from "lucide-react";
 import {
   Sheet,
@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 const items = [
   { name: "Inicio", href: "/", icon: LayoutDashboard },
@@ -41,15 +43,24 @@ const items = [
 export function MainNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const logoImage = PlaceHolderImages.find(img => img.id === "app-logo");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo a la izquierda */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-            <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
-          </div>
+          {logoImage && (
+            <div className="relative w-10 h-10 overflow-hidden rounded-lg shadow-sm">
+              <Image
+                src={logoImage.imageUrl}
+                alt="MB FOCUS Logo"
+                fill
+                className="object-cover"
+                data-ai-hint={logoImage.imageHint}
+              />
+            </div>
+          )}
           <span className="font-headline font-bold text-lg tracking-tight text-primary uppercase">
             MB FOCUS
           </span>
@@ -66,9 +77,17 @@ export function MainNav() {
           <SheetContent side="right" className="w-[300px] sm:w-[400px]">
             <SheetHeader className="mb-6">
               <SheetTitle className="text-left flex items-center gap-2 text-primary">
-                <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-                  <div className="w-3 h-3 border border-white rounded-sm rotate-45" />
-                </div>
+                {logoImage && (
+                  <div className="relative w-6 h-6 overflow-hidden rounded">
+                    <Image
+                      src={logoImage.imageUrl}
+                      alt="Mini Logo"
+                      fill
+                      className="object-cover"
+                      data-ai-hint={logoImage.imageHint}
+                    />
+                  </div>
+                )}
                 Módulos
               </SheetTitle>
             </SheetHeader>

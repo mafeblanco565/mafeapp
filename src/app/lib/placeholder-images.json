@@ -2,6 +2,12 @@
 {
   "placeholderImages": [
     {
+      "id": "app-logo",
+      "description": "Logotipo oficial de MB FOCUS",
+      "imageUrl": "https://picsum.photos/seed/mb-focus-logo/200/200",
+      "imageHint": "modern logo"
+    },
+    {
       "id": "grocery-hero",
       "description": "Fresh produce and grocery items",
       "imageUrl": "https://picsum.photos/seed/grocery1/800/400",
