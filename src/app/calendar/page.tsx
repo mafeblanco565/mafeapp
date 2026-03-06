@@ -4,17 +4,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
-  Check, 
   Calendar as CalendarIcon, 
-  Target, 
-  Search, 
-  Plus, 
-  MoreVertical,
-  ChevronLeft,
-  ChevronRight,
-  Trash2,
+  ChevronLeft, 
+  ChevronRight, 
+  Plus,
+  Loader2,
   Clock,
-  Loader2
+  Trash2
 } from "lucide-react";
 import { 
   format, 
@@ -22,10 +18,10 @@ import {
   addDays, 
   isSameDay,
   parseISO,
-  getHours,
-  getMinutes,
   isValid,
-  startOfToday
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval
 } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -46,8 +42,6 @@ import {
   SheetDescription
 } from "@/components/ui/sheet";
 import Link from "next/link";
-
-const HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // De 7 AM a 10 PM
 
 export default function CalendarPage() {
   const { user } = useUser();
@@ -75,7 +69,7 @@ export default function CalendarPage() {
   const { data: bills } = useCollection(billsQuery);
 
   const weekDays = useMemo(() => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // Empieza el lunes
+    const start = startOfWeek(currentDate, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentDate]);
 
@@ -154,99 +148,77 @@ export default function CalendarPage() {
   );
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] bg-white overflow-hidden rounded-2xl shadow-xl border animate-in fade-in duration-500">
-      <div className="flex flex-col border-b bg-muted/5">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={goToToday} className="font-bold">Hoy</Button>
-            <div className="flex items-center">
-              <Button variant="ghost" size="icon" onClick={prevWeek}><ChevronLeft className="h-5 w-5" /></Button>
-              <Button variant="ghost" size="icon" onClick={nextWeek}><ChevronRight className="h-5 w-5" /></Button>
-            </div>
-            <h2 className="text-lg font-bold text-primary ml-2 uppercase tracking-tight">
-              {monthName}
-            </h2>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Link href="/tasks">
-              <Button size="sm" className="rounded-full gap-2">
-                <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Añadir Tarea</span>
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-7 border-t border-b bg-background">
-          <div className="w-12 border-r bg-muted/5" />
-          {weekDays.map((day, i) => (
-            <div key={i} className={cn(
-              "flex flex-col items-center py-3 border-r last:border-r-0",
-              isSameDay(day, new Date()) ? "bg-primary/5 text-primary" : ""
-            )}>
-              <span className="text-[10px] font-bold uppercase text-muted-foreground">{format(day, "eee", { locale: es })}</span>
-              <span className={cn(
-                "text-lg font-bold w-8 h-8 flex items-center justify-center rounded-full mt-1",
-                isSameDay(day, new Date()) ? "bg-primary text-white" : ""
-              )}>{format(day, "d")}</span>
-            </div>
-          ))}
-        </div>
+    <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
+          <CalendarIcon className="w-8 h-8" />
+          Mi Agenda
+        </h1>
+        <p className="text-muted-foreground">Vista semanal de tus compromisos.</p>
       </div>
 
-      <div className="flex-1 overflow-auto relative bg-white">
-        <div className="flex min-w-[700px] h-full">
-          <div className="w-12 border-r bg-muted/5 sticky left-0 z-20">
-            {HOURS.map((hour) => (
-              <div key={hour} className="h-20 border-b text-[9px] text-muted-foreground flex items-start justify-center pt-2 font-bold uppercase">
-                {hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
-              </div>
-            ))}
+      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border shadow-sm">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={goToToday} className="font-bold">Hoy</Button>
+          <div className="flex items-center">
+            <Button variant="ghost" size="icon" onClick={prevWeek}><ChevronLeft className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" onClick={nextWeek}><ChevronRight className="h-5 w-5" /></Button>
           </div>
-
-          <div className="flex-1 grid grid-cols-7 relative">
-            <div className="absolute inset-0 grid grid-rows-[repeat(16,minmax(0,1fr))] pointer-events-none">
-              {HOURS.map((hour) => (
-                <div key={hour} className="border-b border-muted/20 w-full h-20" />
-              ))}
-            </div>
-            
-            {weekDays.map((day, i) => (
-              <div key={i} className="border-r border-muted/10 relative last:border-r-0 h-full">
-                {calendarEvents
-                  .filter(event => isSameDay(event.date, day))
-                  .map((event) => {
-                    const hour = getHours(event.date);
-                    const minute = getMinutes(event.date);
-                    if (hour < 7 || hour > 22) return null;
-                    return (
-                      <div
-                        key={event.id}
-                        onClick={() => handleEventClick(event)}
-                        className={cn(
-                          "absolute left-1 right-1 p-2 rounded-lg text-[10px] font-bold text-white shadow-sm overflow-hidden cursor-pointer transition-all hover:scale-[1.03] z-10",
-                          event.color
-                        )}
-                        style={{
-                          top: `${(hour - 7) * 5 + (minute / 60) * 5}rem`,
-                          height: `3rem`,
-                        }}
-                      >
-                        <div className="flex flex-col h-full justify-between">
-                          <span className="truncate leading-tight">{event.title}</span>
-                          <span className="text-[8px] opacity-90">{format(event.date, 'HH:mm')}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-            ))}
-          </div>
+          <h2 className="text-lg font-bold text-primary ml-2 uppercase tracking-tight">
+            {monthName}
+          </h2>
         </div>
+        <Link href="/tasks">
+          <Button size="sm" className="rounded-full gap-2">
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Añadir Tarea</span>
+          </Button>
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+        {weekDays.map((day, i) => {
+          const dayEvents = calendarEvents.filter(event => isSameDay(event.date, day));
+          const isToday = isSameDay(day, new Date());
+          
+          return (
+            <div key={i} className={cn(
+              "flex flex-col min-h-[200px] bg-white rounded-2xl border shadow-sm overflow-hidden transition-all",
+              isToday ? "ring-2 ring-primary ring-inset" : ""
+            )}>
+              <div className={cn(
+                "p-3 border-b text-center",
+                isToday ? "bg-primary text-white" : "bg-muted/10"
+              )}>
+                <p className="text-[10px] font-bold uppercase opacity-80">{format(day, "eee", { locale: es })}</p>
+                <p className="text-xl font-bold">{format(day, "d")}</p>
+              </div>
+              
+              <div className="flex-1 p-2 space-y-2 overflow-y-auto max-h-[300px]">
+                {dayEvents.length === 0 ? (
+                  <p className="text-[10px] text-center text-muted-foreground mt-4 italic">Sin eventos</p>
+                ) : (
+                  dayEvents.map((event) => (
+                    <div
+                      key={event.id}
+                      onClick={() => handleEventClick(event)}
+                      className={cn(
+                        "p-2 rounded-xl text-[10px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02]",
+                        event.color
+                      )}
+                    >
+                      <p className="truncate">{event.title}</p>
+                      <p className="text-[8px] opacity-80 mt-1">{format(event.date, 'HH:mm')}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-3xl h-[50vh]">
+        <SheetContent side="bottom" className="rounded-t-3xl h-[60vh]">
           {selectedEvent ? (
             <div className="max-w-md mx-auto">
               <SheetHeader>
@@ -255,7 +227,7 @@ export default function CalendarPage() {
                   {selectedEvent.title}
                 </SheetTitle>
                 <SheetDescription>
-                  Gestión de evento programado
+                  Detalles del evento programado
                 </SheetDescription>
               </SheetHeader>
 

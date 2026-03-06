@@ -55,8 +55,8 @@ export default function GroceryPage() {
     const colRef = collection(firestore, "users", user.uid, "groceryItems");
     addDocumentNonBlocking(colRef, {
       userId: user.uid,
-      name: newItem,
-      quantity: newQuantity || "1 unidad",
+      name: newItem.trim(),
+      quantity: newQuantity.trim() || "1 unidad",
       isPurchased: false,
       suggestedByAI: false,
       createdAt: new Date().toISOString(),
@@ -117,10 +117,16 @@ export default function GroceryPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
           <ShoppingCart className="w-8 h-8" />
@@ -167,8 +173,9 @@ export default function GroceryPage() {
                   </div>
                 )}
                 {!isLoading && items?.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground">
-                    Tu lista de compra está vacía. ¡Empieza a añadir artículos o usa sugerencias de IA!
+                  <div className="p-8 text-center text-muted-foreground bg-muted/5">
+                    <p className="font-medium text-sm">Tu lista de compra está vacía.</p>
+                    <p className="text-xs mt-1">¡Empieza a añadir artículos o usa sugerencias de IA!</p>
                   </div>
                 )}
                 {items?.map((item: any) => (
@@ -180,13 +187,14 @@ export default function GroceryPage() {
                     )}
                   >
                     <Checkbox 
+                      id={item.id}
                       checked={item.isPurchased} 
                       onCheckedChange={() => toggleItem(item.id, item.isPurchased)}
                       className="w-5 h-5"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 cursor-pointer" onClick={() => toggleItem(item.id, item.isPurchased)}>
                       <p className={cn(
-                        "font-medium",
+                        "font-medium text-sm",
                         item.isPurchased && "line-through text-muted-foreground"
                       )}>
                         {item.name}
@@ -196,7 +204,7 @@ export default function GroceryPage() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="opacity-0 group-hover:opacity-100 text-destructive"
+                      className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
                       onClick={() => removeItem(item.id)}
                     >
                       <Trash2 className="w-4 h-4" />
@@ -211,12 +219,12 @@ export default function GroceryPage() {
         <div className="space-y-4">
           <Card className="border-accent/20 bg-accent/5">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-accent">
+              <CardTitle className="flex items-center gap-2 text-accent text-lg">
                 <Sparkles className="w-5 h-5" />
                 Asistente IA
               </CardTitle>
               <CardDescription>
-                ¿Necesitas inspiración? Deja que la IA cree tu lista.
+                ¿Sin ideas? Deja que la IA sugiera tu lista.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -225,7 +233,7 @@ export default function GroceryPage() {
                 <Input 
                   value={aiTheme} 
                   onChange={(e) => setAiTheme(e.target.value)}
-                  placeholder="ej. Cena de Pasta Italiana" 
+                  placeholder="ej. Pasta Bolognesa" 
                 />
               </div>
               <Button 
@@ -238,22 +246,22 @@ export default function GroceryPage() {
                 ) : (
                   <Sparkles className="w-4 h-4" />
                 )}
-                Generar Lista con IA
+                Sugerir con IA
               </Button>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-semibold">Estadísticas</CardTitle>
+              <CardTitle className="text-sm font-semibold uppercase tracking-wider">Estadísticas</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>Artículos Totales:</span>
+                <span>Artículos:</span>
                 <span className="font-bold">{items?.length || 0}</span>
               </div>
               <div className="flex justify-between">
-                <span>Completado:</span>
+                <span>Comprados:</span>
                 <span className="font-bold text-green-600">{items?.filter((i: any) => i.isPurchased).length || 0}</span>
               </div>
             </CardContent>

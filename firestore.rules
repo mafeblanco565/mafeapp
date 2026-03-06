@@ -1,155 +1,73 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * MB Focus Security Rules
-     *
-     * CORE PHILOSOPHY:
-     * This ruleset implements a strict User-Ownership model. All user-generated content is 
-     * logically and physically isolated within the /users/{userId} path. Authorization is 
-     * derived primarily from the path itself, supplemented by denormalized ownership fields 
-     * within documents to ensure atomicity and performance.
-     *
-     * DATA STRUCTURE:
-     * - /users/{userId}: Root profile and container for all user data.
-     * - /users/{userId}/tasks: Calendar-integrated tasks.
-     * - /users/{userId}/bills: Financial obligations with calendar views.
-     * - /users/{userId}/groceryLists: User-owned shopping lists and items.
-     * - /users/{userId}/habits: Personal development tracking.
-     * - /users/{userId}/notes: Private text snippets.
-     * - /adminRoles/{adminId}: A system-level collection for administrative bypass.
-     *
-     * KEY SECURITY DECISIONS:
-     * 1. Path-Based Authorization: The {userId} wildcard in the path is the source of truth.
-     * 2. Denormalization: Sub-documents (like GroceryItems or HabitLogs) include a userId 
-     *    field to allow for direct validation against the authenticated user without 
-     *    performing costly parent-document lookups (get() calls).
-     * 3. Prototyping Flexibility: Rules enforce WHO can write (authorization) and WHERE 
-     *    they can write (relational integrity), but do not restrict the specific fields 
-     *    or data types of the content itself.
-     * 4. Admin Bypass: The isAdmin() check allows for a central dashboard to manage data 
-     *    across the platform without compromising individual user security rules.
-     */
-
-    // --- Helper Functions ---
-
-    /** @description Checks if the user is authenticated. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** @description Checks if the authenticated user's UID matches the provided userId. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** @description Checks if the user exists in the adminRoles collection. */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/adminRoles/$(request.auth.uid));
     }
 
-    /** @description Verifies ownership and document existence for updates and deletions. */
     function isExistingOwner(userId) {
       return resource != null && (isOwner(userId) || isAdmin());
     }
 
-    /** @description Validates that a field is not being changed during an update. */
-    function isUnchanged(fieldName) {
-      return request.resource.data[fieldName] == resource.data[fieldName];
-    }
-
-    // --- Collection Rules ---
-
-    /**
-     * @description Administrative roles for system-wide access.
-     * @path /adminRoles/{adminId}
-     * @allow (get) Any signed-in user to check roles.
-     * @deny (write) Any client-side write; managed via admin console or cloud functions.
-     * @principle Restricts administrative privilege management to trusted environments.
-     */
     match /adminRoles/{adminId} {
       allow get: if isSignedIn();
       allow list: if isAdmin();
       allow create, update, delete: if false;
     }
 
-    /**
-     * @description User profile documents.
-     * @path /users/{userId}
-     * @allow (create) A user creating their own profile document.
-     * @deny (update) Attempting to change a profile belonging to another UID.
-     * @principle Enforces self-creation and self-management of profile data.
-     */
     match /users/{userId} {
       allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId);
       allow update, delete: if isExistingOwner(userId);
 
-      /**
-       * @description User-specific tasks (Calendar activities).
-       * @path /users/{userId}/tasks/{taskId}
-       * @allow (create) User 'A' creating a task at /users/A/tasks/1 with userId: 'A'.
-       * @deny (create) User 'A' creating a task with userId: 'B'.
-       * @principle Validates relational integrity between the path and document data.
-       */
       match /tasks/{taskId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId) && (request.resource.data.userId == userId || isAdmin());
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
-       * @description User-specific bills (Calendar activities).
-       * @path /users/{userId}/bills/{billId}
-       * @allow (update) User updating their own bill amount.
-       * @deny (delete) Attempting to delete a bill that doesn't exist or isn't owned.
-       * @principle Enforces existing ownership for destructive operations.
-       */
       match /bills/{billId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId) && (request.resource.data.userId == userId || isAdmin());
         allow delete: if isExistingOwner(userId);
       }
 
       match /billCategories/{billCategoryId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId);
         allow delete: if isExistingOwner(userId);
       }
 
-      match /groceryLists/{groceryListId} {
+      match /groceryItems/{groceryItemId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId);
         allow delete: if isExistingOwner(userId);
-
-        /**
-         * @description Items within a grocery list.
-         * @path /users/{userId}/groceryLists/{groceryListId}/groceryItems/{itemId}
-         * @principle Uses denormalized userId for authorization without parent get() calls.
-         */
-        match /groceryItems/{groceryItemId} {
-          allow get, list: if isOwner(userId) || isAdmin();
-          allow create: if isOwner(userId) && request.resource.data.userId == userId;
-          allow update: if isExistingOwner(userId) && isUnchanged('userId');
-          allow delete: if isExistingOwner(userId);
-        }
       }
 
       match /habits/{habitId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId);
         allow delete: if isExistingOwner(userId);
 
         match /habitLogs/{habitLogId} {
           allow get, list: if isOwner(userId) || isAdmin();
           allow create: if isOwner(userId) && request.resource.data.userId == userId;
-          allow update: if isExistingOwner(userId) && isUnchanged('userId');
+          allow update: if isExistingOwner(userId);
           allow delete: if isExistingOwner(userId);
         }
       }
@@ -157,7 +75,7 @@ service cloud.firestore {
       match /notes/{noteId} {
         allow get, list: if isOwner(userId) || isAdmin();
         allow create: if isOwner(userId) && request.resource.data.userId == userId;
-        allow update: if isExistingOwner(userId) && isUnchanged('userId');
+        allow update: if isExistingOwner(userId);
         allow delete: if isExistingOwner(userId);
       }
     }
