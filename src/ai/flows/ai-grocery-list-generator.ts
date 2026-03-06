@@ -18,8 +18,8 @@ export type GenerateGroceryListInput = z.infer<typeof GenerateGroceryListInputSc
 const GenerateGroceryListOutputSchema = z.object({
   items: z.array(z.object({
     name: z.string().describe('El nombre del artículo de la compra.'),
-    quantity: z.string().describe('La cantidad sugerida para el artículo (ej. "1 docena", "500g", "1 unidad").'),
-  })).describe('Una lista de artículos de compra sugeridos con sus cantidades.'),
+    quantity: z.string().describe('La cantidad sugerida.'),
+  })).describe('Una lista de artículos de compra sugeridos.'),
 });
 export type GenerateGroceryListOutput = z.infer<typeof GenerateGroceryListOutputSchema>;
 
@@ -27,22 +27,8 @@ const groceryListPrompt = ai.definePrompt({
   name: 'groceryListPrompt',
   input: {schema: GenerateGroceryListInputSchema},
   output: {schema: GenerateGroceryListOutputSchema},
-  prompt: `Eres un experto asistente de compras y nutrición. 
-Tu tarea es generar una lista de compras completa y lógica basada en el tema o comida proporcionado: "{{{theme}}}".
-
-INSTRUCCIONES:
-1. Genera una lista de entre 5 y 10 artículos esenciales.
-2. Incluye cantidades realistas para cada artículo.
-3. Todo el contenido (nombres y cantidades) DEBE estar en ESPAÑOL.
-4. Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
-
-Ejemplo:
-{
-  "items": [
-    { "name": "Leche entera", "quantity": "2 litros" },
-    { "name": "Huevos", "quantity": "1 docena" }
-  ]
-}`,
+  prompt: `Eres un asistente de cocina. Genera una lista de 5 a 8 ingredientes esenciales para cocinar: "{{{theme}}}". 
+Incluye cantidades simples. Responde solo en ESPAÑOL y en formato JSON.`,
 });
 
 const aiGroceryListGeneratorFlow = ai.defineFlow(
@@ -53,7 +39,9 @@ const aiGroceryListGeneratorFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await groceryListPrompt(input);
-    if (!output) throw new Error('No se pudo generar la lista de compras.');
+    if (!output || !output.items) {
+      throw new Error('No se pudieron generar sugerencias.');
+    }
     return output;
   }
 );

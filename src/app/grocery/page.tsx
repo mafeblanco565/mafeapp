@@ -82,14 +82,21 @@ export default function GroceryPage() {
   };
 
   const handleAiSuggest = async () => {
-    if (!aiTheme.trim() || !user || !firestore) return;
+    if (!aiTheme.trim() || !user || !firestore) {
+      toast({
+        title: "Campo vacío",
+        description: "Escribe qué quieres cocinar primero.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsAiLoading(true);
     try {
       const result = await generateGroceryList({ theme: aiTheme });
-      if (result && result.items) {
+      if (result && result.items && result.items.length > 0) {
         const colRef = collection(firestore, "users", user.uid, "groceryItems");
         
-        // Añadir items secuencialmente para evitar saturación si fuera necesario
         for (const item of result.items) {
           addDocumentNonBlocking(colRef, {
             userId: user.uid,
@@ -103,16 +110,18 @@ export default function GroceryPage() {
         }
 
         toast({
-          title: "Sugerencias listas",
-          description: `Se han añadido ${result.items.length} artículos para "${aiTheme}"`,
+          title: "¡Lista generada!",
+          description: `Se añadieron ${result.items.length} ingredientes para ${aiTheme}.`,
         });
         setAiTheme("");
+      } else {
+        throw new Error("No se recibieron artículos de la IA.");
       }
     } catch (error) {
       console.error("AI Error:", error);
       toast({
         title: "Error de IA",
-        description: "Hubo un problema al generar la lista. Por favor, intenta de nuevo.",
+        description: "No pudimos generar los ingredientes. Verifica tu conexión.",
         variant: "destructive",
       });
     } finally {
@@ -133,21 +142,21 @@ export default function GroceryPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
           <ShoppingCart className="w-8 h-8" />
-          Compras
+          Lista de Compras
         </h1>
-        <p className="text-muted-foreground text-sm">Organiza tu lista de mercado fácilmente con ayuda de IA.</p>
+        <p className="text-muted-foreground text-sm">Gestiona tus compras con inteligencia.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card>
+          <Card className="border-primary/10">
             <CardHeader className="pb-3">
-              <CardTitle className="text-md">Nuevo Artículo</CardTitle>
+              <CardTitle className="text-md font-bold">Añadir Manualmente</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Input 
-                  placeholder="Ej. Manzanas" 
+                  placeholder="Producto (ej. Leche)" 
                   className="flex-1 min-w-[150px]"
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
@@ -155,7 +164,7 @@ export default function GroceryPage() {
                 />
                 <Input 
                   placeholder="Cant." 
-                  className="w-20"
+                  className="w-24"
                   value={newQuantity}
                   onChange={(e) => setNewQuantity(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
@@ -167,24 +176,26 @@ export default function GroceryPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="overflow-hidden">
             <CardContent className="p-0">
-              <div className="divide-y">
+              <div className="divide-y divide-border">
                 {isLoading ? (
-                  <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando lista...
+                  <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <p className="text-sm">Cargando tu lista...</p>
                   </div>
                 ) : !items || items.length === 0 ? (
-                  <div className="p-12 text-center text-muted-foreground bg-muted/5">
-                    <p className="text-sm">Tu lista de compras está vacía.</p>
+                  <div className="p-16 text-center text-muted-foreground bg-muted/5 flex flex-col items-center gap-3">
+                    <ShoppingCart className="w-10 h-10 opacity-10" />
+                    <p className="text-sm font-medium">No hay productos en la lista.</p>
                   </div>
                 ) : (
                   items.map((item: any) => (
                     <div 
                       key={item.id} 
                       className={cn(
-                        "flex items-center gap-4 p-4 transition-colors group",
-                        item.isPurchased ? "bg-muted/30" : "hover:bg-secondary/20"
+                        "flex items-center gap-4 p-4 transition-all group",
+                        item.isPurchased ? "bg-muted/30" : "hover:bg-primary/5"
                       )}
                     >
                       <Checkbox 
@@ -195,17 +206,17 @@ export default function GroceryPage() {
                       />
                       <div className="flex-1 cursor-pointer" onClick={() => toggleItem(item.id, item.isPurchased)}>
                         <p className={cn(
-                          "font-medium text-sm",
+                          "font-bold text-sm",
                           item.isPurchased && "line-through text-muted-foreground"
                         )}>
                           {item.name}
                         </p>
-                        <p className="text-[10px] text-muted-foreground">{item.quantity}</p>
+                        <p className="text-[10px] text-muted-foreground font-medium">{item.quantity}</p>
                       </div>
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
+                        className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8 hover:bg-destructive/10"
                         onClick={() => removeItem(item.id)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -219,29 +230,31 @@ export default function GroceryPage() {
         </div>
 
         <div className="space-y-4">
-          <Card className="border-accent/20 bg-accent/5">
+          <Card className="border-accent/40 bg-accent/5 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-accent text-md">
+              <CardTitle className="flex items-center gap-2 text-accent text-md font-bold">
                 <Sparkles className="w-5 h-5" />
-                Asistente IA
+                Asistente de IA
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-xs text-muted-foreground">Escribe un plato o tipo de dieta y la IA generará los ingredientes por ti.</p>
+              <p className="text-xs text-muted-foreground font-medium leading-relaxed">
+                Escribe un plato (ej: "Lasaña") y la IA añadirá los ingredientes necesarios a tu lista.
+              </p>
               <Input 
                 value={aiTheme} 
                 onChange={(e) => setAiTheme(e.target.value)}
-                placeholder="Ej. Lasaña de carne" 
-                className="text-sm"
+                placeholder="¿Qué quieres cocinar?" 
+                className="text-sm border-accent/20 focus:border-accent"
                 onKeyDown={(e) => e.key === 'Enter' && handleAiSuggest()}
               />
               <Button 
                 onClick={handleAiSuggest} 
-                className="w-full bg-accent hover:bg-accent/90 gap-2 font-bold"
+                className="w-full bg-accent hover:bg-accent/90 text-white gap-2 font-bold shadow-md h-11"
                 disabled={isAiLoading || !aiTheme.trim()}
               >
-                {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                {isAiLoading ? "Generando..." : "Sugerir Ingredientes"}
+                {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                {isAiLoading ? "Pensando..." : "Sugerir Ingredientes"}
               </Button>
             </CardContent>
           </Card>
