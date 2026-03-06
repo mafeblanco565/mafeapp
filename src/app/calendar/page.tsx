@@ -63,8 +63,8 @@ export default function CalendarPage() {
     return collection(firestore, "users", user.uid, "bills");
   }, [firestore, user]);
 
-  const { data: tasks, isLoading: tasksLoading } = useCollection(tasksQuery);
-  const { data: bills, isLoading: billsLoading } = useCollection(billsQuery);
+  const { data: tasks } = useCollection(tasksQuery);
+  const { data: bills } = useCollection(billsQuery);
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -95,7 +95,7 @@ export default function CalendarPage() {
           ...task,
           type: 'task',
           displayDate: date,
-          color: task.priority === 'Alta' ? 'bg-red-500' : task.priority === 'Media' ? 'bg-orange-400' : 'bg-blue-400',
+          color: task.priority === 'Alta' ? 'bg-primary' : task.priority === 'Media' ? 'bg-accent' : 'bg-blue-400',
           title: task.title
         });
       }
@@ -166,7 +166,7 @@ export default function CalendarPage() {
           return (
             <div key={i} className={cn(
               "flex flex-col min-h-[160px] bg-white rounded-3xl border shadow-sm overflow-hidden transition-all",
-              isToday ? "ring-2 ring-primary ring-inset border-transparent" : "border-muted/30"
+              isToday ? "ring-2 ring-primary ring-inset border-transparent shadow-lg" : "border-muted/30"
             )}>
               <div className={cn(
                 "p-3 border-b text-center",
@@ -176,11 +176,11 @@ export default function CalendarPage() {
                 <p className="text-xl font-bold">{format(day, "d")}</p>
               </div>
               
-              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[250px]">
+              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[300px]">
                 {dayEvents.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full opacity-20 mt-4">
                     <Info className="w-4 h-4" />
-                    <p className="text-[8px] font-bold uppercase mt-1">Libre</p>
+                    <p className="text-[8px] font-bold uppercase mt-1">Sin planes</p>
                   </div>
                 ) : (
                   dayEvents.map((event) => (
@@ -204,7 +204,7 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-[3rem] h-[40vh] border-none shadow-2xl">
+        <SheetContent side="bottom" className="rounded-t-[3rem] h-auto pb-10 border-none shadow-2xl">
           {selectedEvent ? (
             <div className="max-w-md mx-auto space-y-8 pt-6">
               <SheetHeader>

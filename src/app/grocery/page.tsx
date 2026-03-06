@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Plus, 
   Sparkles, 
@@ -34,14 +33,14 @@ export default function GroceryPage() {
   const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiTheme, setAiTheme] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const itemsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -99,8 +98,8 @@ export default function GroceryPage() {
       if (result && result.items && result.items.length > 0) {
         const colRef = collection(firestore, "users", user.uid, "groceryItems");
         
-        // Añadimos cada item de la IA a la base de datos
-        result.items.forEach(item => {
+        // Añadimos cada item de la IA a la base de datos de forma secuencial pero no bloqueante
+        for (const item of result.items) {
           addDocumentNonBlocking(colRef, {
             userId: user.uid,
             name: item.name,
@@ -110,7 +109,7 @@ export default function GroceryPage() {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           });
-        });
+        }
 
         toast({
           title: "¡Lista generada!",
@@ -124,7 +123,7 @@ export default function GroceryPage() {
       console.error("AI Error:", error);
       toast({
         title: "Error del Asistente",
-        description: "No se pudieron generar los ingredientes en este momento.",
+        description: "Hubo un problema al consultar a la IA. Reintenta.",
         variant: "destructive",
       });
     } finally {
@@ -143,124 +142,120 @@ export default function GroceryPage() {
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
+        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2 uppercase tracking-tighter">
           <ShoppingCart className="w-8 h-8" />
-          Mercado Inteligente
+          Compras Inteligentes
         </h1>
-        <p className="text-muted-foreground text-sm">Organiza tus compras con ayuda de la IA.</p>
+        <p className="text-muted-foreground text-sm font-bold uppercase opacity-60">Organiza tu mercado con el poder de la IA.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="border-primary/10">
+          <Card className="border-primary/10 bg-white rounded-3xl overflow-hidden shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold uppercase tracking-tight">Nuevo Artículo</CardTitle>
+              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Añadir a la lista</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 <Input 
                   placeholder="Producto..." 
-                  className="flex-1 min-w-[150px]"
+                  className="flex-1 min-w-[150px] rounded-xl"
                   value={newItem}
                   onChange={(e) => setNewItem(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
                 />
                 <Input 
                   placeholder="Cant." 
-                  className="w-24"
+                  className="w-24 rounded-xl"
                   value={newQuantity}
                   onChange={(e) => setNewQuantity(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
                 />
-                <Button onClick={addItem} size="icon" className="shrink-0">
+                <Button onClick={addItem} size="icon" className="shrink-0 rounded-xl shadow-md">
                   <Plus className="w-4 h-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden border-none shadow-none bg-transparent">
-            <CardContent className="p-0">
-              <div className="grid gap-3">
-                {isLoading ? (
-                  <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <p className="text-xs">Actualizando lista...</p>
-                  </div>
-                ) : !items || items.length === 0 ? (
-                  <div className="p-16 text-center text-muted-foreground bg-white rounded-2xl border-2 border-dashed flex flex-col items-center gap-3">
-                    <ShoppingCart className="w-10 h-10 opacity-10" />
-                    <p className="text-sm font-medium">Tu lista está vacía.</p>
-                  </div>
-                ) : (
-                  items.map((item: any) => (
-                    <div 
-                      key={item.id} 
-                      className={cn(
-                        "flex items-center gap-4 p-4 rounded-2xl bg-white border transition-all group",
-                        item.isPurchased ? "opacity-50 grayscale" : "hover:border-primary/30"
-                      )}
-                    >
-                      <button 
-                        onClick={() => toggleItem(item.id, item.isPurchased)}
-                        className={cn(
-                          "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
-                          item.isPurchased ? "bg-primary border-primary text-white" : "border-muted"
-                        )}
-                      >
-                        {item.isPurchased && <CheckCircle2 className="w-4 h-4" />}
-                      </button>
-                      <div className="flex-1">
-                        <p className={cn(
-                          "font-bold text-sm",
-                          item.isPurchased && "line-through"
-                        )}>
-                          {item.name}
-                        </p>
-                        <p className="text-[10px] text-muted-foreground font-bold">{item.quantity}</p>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-destructive h-8 w-8 hover:bg-destructive/10"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ))
-                )}
+          <div className="grid gap-3">
+            {isLoading ? (
+              <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <p className="text-xs uppercase font-bold opacity-40">Sincronizando...</p>
               </div>
-            </CardContent>
-          </Card>
+            ) : !items || items.length === 0 ? (
+              <div className="p-16 text-center text-muted-foreground bg-white rounded-[2.5rem] border-2 border-dashed flex flex-col items-center gap-3">
+                <ShoppingCart className="w-10 h-10 opacity-10" />
+                <p className="text-xs font-bold uppercase tracking-widest">Tu lista está vacía</p>
+              </div>
+            ) : (
+              items.map((item: any) => (
+                <div 
+                  key={item.id} 
+                  className={cn(
+                    "flex items-center gap-4 p-4 rounded-[1.5rem] bg-white border transition-all group shadow-sm",
+                    item.isPurchased ? "opacity-40 grayscale" : "hover:border-primary/30"
+                  )}
+                >
+                  <button 
+                    onClick={() => toggleItem(item.id, item.isPurchased)}
+                    className={cn(
+                      "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                      item.isPurchased ? "bg-primary border-primary text-white" : "border-muted"
+                    )}
+                  >
+                    {item.isPurchased && <CheckCircle2 className="w-4 h-4" />}
+                  </button>
+                  <div className="flex-1">
+                    <p className={cn(
+                      "font-bold text-sm uppercase tracking-tight",
+                      item.isPurchased && "line-through"
+                    )}>
+                      {item.name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase opacity-60">{item.quantity}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full"
+                    onClick={() => removeItem(item.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         <div className="space-y-4">
-          <Card className="border-accent/40 bg-accent/5 overflow-hidden rounded-2xl">
+          <Card className="border-accent/40 bg-accent/5 overflow-hidden rounded-[2.5rem] shadow-sm">
             <CardHeader className="bg-accent/10 pb-4">
-              <CardTitle className="flex items-center gap-2 text-accent text-sm font-bold uppercase">
+              <CardTitle className="flex items-center gap-2 text-accent text-xs font-bold uppercase tracking-widest">
                 <Sparkles className="w-5 h-5" />
-                Sugerencias IA
+                Asistente Gourmet
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-              <p className="text-xs text-muted-foreground font-medium leading-relaxed">
-                ¿Qué vas a cocinar? La IA añadirá los ingredientes básicos automáticamente.
+              <p className="text-[10px] text-muted-foreground font-bold uppercase leading-relaxed opacity-70">
+                Escribe un plato y la IA generará la lista de ingredientes necesarios.
               </p>
               <Input 
                 value={aiTheme} 
                 onChange={(e) => setAiTheme(e.target.value)}
-                placeholder="Ej: Sancocho, Lasaña..." 
-                className="text-sm border-accent/20 focus:border-accent"
+                placeholder="Ej: Sancocho, Pasta..." 
+                className="text-sm rounded-xl border-accent/20 focus:border-accent"
                 onKeyDown={(e) => e.key === 'Enter' && handleAiSuggest()}
               />
               <Button 
                 onClick={handleAiSuggest} 
-                className="w-full bg-accent hover:bg-accent/90 text-white gap-2 font-bold shadow-md h-12 rounded-xl"
+                className="w-full bg-accent hover:bg-accent/90 text-white gap-2 font-bold shadow-lg h-12 rounded-2xl transition-transform active:scale-95"
                 disabled={isAiLoading || !aiTheme.trim()}
               >
                 {isAiLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                {isAiLoading ? "Consultando..." : "Generar Ingredientes"}
+                {isAiLoading ? "PENSANDO..." : "GENERAR INGREDIENTES"}
               </Button>
             </CardContent>
           </Card>

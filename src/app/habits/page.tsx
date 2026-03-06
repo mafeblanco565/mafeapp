@@ -53,17 +53,20 @@ export default function HabitsPage() {
 
   const toggleDay = (habit: any, index: number) => {
     if (!user || !firestore) return;
-    const currentDays = habit.days || [false, false, false, false, false, false, false];
-    const newDays = [...currentDays];
-    newDays[index] = !newDays[index];
+    const currentDays = Array.isArray(habit.days) ? [...habit.days] : [false, false, false, false, false, false, false];
     
-    // Calcular racha simple (conteo de días marcados)
-    const streak = newDays.filter(d => d).length;
+    // Asegurar que el array tenga longitud 7
+    while(currentDays.length < 7) currentDays.push(false);
+    
+    currentDays[index] = !currentDays[index];
+    
+    // Racha: conteo de días marcados consecutivamente (simplificado)
+    const streak = currentDays.filter(d => d).length;
     
     const docRef = doc(firestore, "users", user.uid, "habits", habit.id);
     updateDocumentNonBlocking(docRef, { 
-      days: newDays, 
-      streak,
+      days: currentDays, 
+      streak: streak,
       updatedAt: new Date().toISOString() 
     });
   };
@@ -81,15 +84,15 @@ export default function HabitsPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2 uppercase tracking-tighter">
           <Target className="w-8 h-8" />
-          Constructor de Hábitos
+          Hábitos Maestros
         </h1>
-        <p className="text-muted-foreground text-sm font-bold opacity-60">Pequeños pasos, grandes resultados cada semana.</p>
+        <p className="text-muted-foreground text-sm font-bold uppercase opacity-60">Disciplina diaria para un enfoque total.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-1 border-primary/10 bg-primary/5">
+        <Card className="lg:col-span-1 border-primary/10 bg-primary/5 rounded-[2rem] shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xs font-bold uppercase text-primary">Nuevo Desafío</CardTitle>
+            <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-primary">Establecer Meta</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Input 
@@ -97,10 +100,10 @@ export default function HabitsPage() {
               value={newName} 
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && addHabit()}
-              className="rounded-xl border-primary/20"
+              className="rounded-xl border-primary/20 bg-white"
             />
-            <Button onClick={addHabit} className="w-full rounded-xl gap-2 font-bold uppercase text-xs" disabled={!newName.trim()}>
-              <Plus className="w-4 h-4" /> Empezar
+            <Button onClick={addHabit} className="w-full rounded-xl gap-2 font-bold uppercase text-xs h-12 shadow-md" disabled={!newName.trim()}>
+              <Plus className="w-4 h-4" /> Activar Hábito
             </Button>
           </CardContent>
         </Card>
@@ -109,27 +112,27 @@ export default function HabitsPage() {
           {isLoading ? (
             <div className="flex justify-center py-10"><Loader2 className="animate-spin text-primary" /></div>
           ) : !habits || habits.length === 0 ? (
-            <div className="p-16 text-center text-muted-foreground bg-white rounded-3xl border-2 border-dashed flex flex-col items-center gap-4">
+            <div className="p-16 text-center text-muted-foreground bg-white rounded-[2.5rem] border-2 border-dashed flex flex-col items-center gap-4">
               <Target className="w-12 h-12 opacity-10" />
-              <p className="font-bold uppercase text-xs">No tienes hábitos activos</p>
+              <p className="font-bold uppercase text-[10px] tracking-widest">Aún no has definido tus hábitos semanales</p>
             </div>
           ) : (
             habits.map((habit: any) => (
-              <Card key={habit.id} className="overflow-hidden group hover:shadow-md transition-all rounded-[2rem] border-none shadow-sm bg-white">
+              <Card key={habit.id} className="overflow-hidden group hover:shadow-lg transition-all rounded-[2.5rem] border-none shadow-sm bg-white">
                 <CardContent className="p-6">
                   <div className="flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                          <Target className="w-5 h-5 text-primary" />
+                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
+                          <Target className="w-6 h-6 text-primary" />
                         </div>
                         <h3 className="font-bold text-lg uppercase tracking-tight">{habit.name}</h3>
                       </div>
                       <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-100 rounded-full text-orange-600 text-xs font-bold shadow-sm">
-                          <Flame className="w-4 h-4" /> {habit.streak || 0}
+                        <div className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-100 rounded-full text-orange-600 text-[10px] font-bold shadow-sm uppercase">
+                          <Flame className="w-4 h-4" /> {habit.streak || 0} Días
                         </div>
-                        <Button variant="ghost" size="icon" className="text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full" onClick={() => removeHabit(habit.id)}>
+                        <Button variant="ghost" size="icon" className="text-destructive h-8 w-8 hover:bg-destructive/10 rounded-full transition-colors" onClick={() => removeHabit(habit.id)}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -138,7 +141,7 @@ export default function HabitsPage() {
                     <div className="grid grid-cols-7 gap-2">
                       {daysOfWeek.map((day, i) => (
                         <div key={i} className="flex flex-col items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground font-bold uppercase">{day}</span>
+                          <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-tight">{day}</span>
                           <button 
                             onClick={() => toggleDay(habit, i)}
                             className={cn(
@@ -148,7 +151,7 @@ export default function HabitsPage() {
                                 : "bg-muted/5 border-muted-foreground/10 hover:border-primary/40 text-transparent"
                             )}
                           >
-                            <CheckCircle2 className="w-5 h-5" />
+                            <CheckCircle2 className="w-6 h-6" />
                           </button>
                         </div>
                       ))}
