@@ -95,7 +95,7 @@ export default function DashboardPage() {
             <Flame className="w-5 h-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">Iniciado</div>
+            <div className="text-3xl font-bold">Activa</div>
             <p className="text-[10px] text-muted-foreground mt-1">¡Sigue construyendo hábitos!</p>
           </CardContent>
         </Card>
