@@ -1,8 +1,10 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { MainNav } from '@/components/layout/main-nav';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { AuthCheck } from '@/components/auth-check';
 
 export const metadata: Metadata = {
   title: 'MB FOCUS - Productividad Móvil',
@@ -24,16 +26,15 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased bg-[#FDFCF8] min-h-screen flex flex-col">
         <FirebaseClientProvider>
-          {/* Navegación superior con hamburguesa */}
-          <MainNav />
-
-          <main className="flex-1 min-h-screen">
-            <div className="container mx-auto p-4 md:p-8 max-w-5xl">
-              {children}
-            </div>
-          </main>
-          
-          <Toaster />
+          <AuthCheck>
+            <MainNav />
+            <main className="flex-1 min-h-screen">
+              <div className="container mx-auto p-4 md:p-8 max-w-5xl">
+                {children}
+              </div>
+            </main>
+            <Toaster />
+          </AuthCheck>
         </FirebaseClientProvider>
       </body>
     </html>

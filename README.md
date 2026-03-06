@@ -1,48 +1,44 @@
 
 # 📱 MB FOCUS - Guía de Inicio Rápido
 
-¡Bienvenido a tu nueva aplicación de productividad! Esta guía está diseñada para ayudarte a poner tu app en internet (GitHub y Vercel) incluso si no sabes nada de código.
+¡Bienvenido a tu nueva aplicación de productividad! Para que tu app sea funcional, debes activar los servicios en tu panel de Firebase.
 
-## 🚀 Paso 1: Subir tu app a GitHub (Tu copia de seguridad)
+## 🛠️ PASO CRUCIAL: Activar Firebase (Solo una vez)
 
-Si te apareció el error "remote origin already exists", sigue estos pasos en la terminal:
+Sin esto, la app se verá pero los botones no guardarán nada:
 
-1. **Borra la conexión anterior**:
-   ```bash
-   git remote remove origin
-   ```
-
-2. **Crea la conexión correcta**:
-   *(Sustituye `TU_REPOSITORIO` por el nombre que le diste en GitHub, por ejemplo: `mb-focus-app`)*
-   ```bash
-   git remote add origin https://github.com/mafeblanco565/TU_REPOSITORIO.git
-   ```
-
-3. **Sube tus archivos**:
-   ```bash
-   git push -u origin main
-   ```
+1. **Entra en [Firebase Console](https://console.firebase.google.com/)**.
+2. **Authentication**:
+   - Ve a "Authentication" -> "Get Started".
+   - En "Sign-in method", activa **"Anonymous"** (Anónimo) y dale a guardar.
+3. **Firestore Database**:
+   - Ve a "Firestore Database" -> "Create database".
+   - Selecciona una ubicación cercana y elige **"Start in production mode"**.
+   - Ve a la pestaña **"Rules"** (Reglas) y asegúrate de que las reglas coincidan con las de tu archivo `firestore.rules` del proyecto.
 
 ---
 
-## 🌐 Paso 2: Publicar en Vercel (Para usarla en tu móvil)
+## 🚀 Paso 1: Subir tu app a GitHub
 
-Vercel hará que tu app tenga una dirección web (como `tu-app.vercel.app`) para que puedas entrar desde tu celular.
+Si te aparece el error "remote origin already exists", ejecuta:
 
-1. **Entra en Vercel**: Ve a [vercel.com](https://vercel.com) e inicia sesión con tu cuenta de GitHub.
-2. **Importar Proyecto**:
-   - Haz clic en **"Add New"** -> **"Project"**.
-   - Verás tu repositorio de GitHub. Dale a **"Import"**.
-3. **Configuración**:
-   - Vercel detectará que es Next.js automáticamente.
-   - **IMPORTANTE**: En la sección **"Environment Variables"**, añade esta variable para que funcione la IA:
-     - Key: `GOOGLE_GENAI_API_KEY`
-     - Value: (Pega aquí tu clave de API de Google Gemini).
-4. **Deploy**: Haz clic en el botón azul **"Deploy"**.
-5. ¡Listo! En 2 minutos tendrás un link para abrir tu app en el móvil.
+1. `git remote remove origin`
+2. `git remote add origin https://github.com/mafeblanco565/TU_REPOSITORIO.git`
+3. `git add .`
+4. `git commit -m "App funcional con Auth"`
+5. `git push -u origin main`
 
-## 🛠️ Tecnologías Usadas
-- **Next.js**: El motor de la app.
-- **Firebase**: La base de datos donde se guardan tus tareas y notas.
-- **Genkit/Gemini**: La inteligencia artificial que genera tus listas de compra.
-- **Tailwind/Shadcn**: Lo que hace que la app se vea bonita y moderna.
+---
+
+## 🌐 Paso 2: Publicar en Vercel
+
+1. **Importa el proyecto** desde GitHub en Vercel.
+2. **IMPORTANTE**: En "Environment Variables", añade:
+   - Key: `GOOGLE_GENAI_API_KEY`
+   - Value: (Tu clave de API de Gemini).
+3. **Deploy**.
+
+## 🛠️ Tecnologías
+- **Next.js / React / Tailwind**
+- **Firebase Auth & Firestore**
+- **Genkit (IA para Compras)**
