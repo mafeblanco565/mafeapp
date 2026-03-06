@@ -1,32 +1,75 @@
+
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { 
-  Search, 
   Plus, 
-  Edit3, 
   Trash2, 
-  Pin
+  Pin,
+  Loader2,
+  Search,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type Note = {
-  id: string;
-  title: string;
-  content: string;
-  updatedAt: string;
-  pinned: boolean;
-};
+import { 
+  useFirestore, 
+  useUser, 
+  useCollection, 
+  useMemoFirebase,
+  addDocumentNonBlocking,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking 
+} from "@/firebase";
+import { collection, doc } from "firebase/firestore";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 export default function NotesPage() {
-  const [notes, setNotes] = useState<Note[]>([
-    { id: "1", title: "Idea de Proyecto: Focus AI", content: "Implementar un modelo de aprendizaje profundo para predecir patrones de productividad basados en el historial de hábitos.", updatedAt: "hace 2h", pinned: true },
-    { id: "2", title: "Recomendaciones de Libros", content: "Hábitos Atómicos, Trabajo Profundo (Deep Work), El Método de la Única Cosa, Esencialismo.", updatedAt: "hace 1d", pinned: false },
-    { id: "3", title: "Receta: Pasta Picante", content: "Ajo, copos de chile, aceite de oliva, parmesano y perejil fresco. ¡Simple y rápido!", updatedAt: "hace 3d", pinned: false },
-  ]);
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+
+  const notesQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, "users", user.uid, "notes");
+  }, [firestore, user]);
+
+  const { data: notes, isLoading } = useCollection(notesQuery);
+
+  const addNote = () => {
+    if (!newTitle.trim() || !user || !firestore) return;
+    const colRef = collection(firestore, "users", user.uid, "notes");
+    addDocumentNonBlocking(colRef, {
+      userId: user.uid,
+      title: newTitle,
+      content: newContent,
+      pinned: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    setNewTitle("");
+    setNewContent("");
+    setIsAdding(false);
+  };
+
+  const removeNote = (id: string) => {
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, "users", user.uid, "notes", id);
+    deleteDocumentNonBlocking(docRef);
+  };
+
+  const togglePin = (id: string, currentStatus: boolean) => {
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, "users", user.uid, "notes", id);
+    updateDocumentNonBlocking(docRef, { pinned: !currentStatus });
+  };
 
   return (
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
@@ -35,62 +78,85 @@ export default function NotesPage() {
           <h1 className="text-3xl font-headline font-bold text-primary">Notas: Ideas Rápidas</h1>
           <p className="text-muted-foreground">Captura la inspiración cuando surja.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="Buscar notas..." className="pl-10 w-full md:w-64" />
-          </div>
-          <Button className="gap-2">
-            <Plus className="w-4 h-4" /> Nueva Nota
-          </Button>
-        </div>
+        <Button onClick={() => setIsAdding(true)} className="gap-2">
+          <Plus className="w-4 h-4" /> Nueva Nota
+        </Button>
       </div>
 
+      {isAdding && (
+        <Card className="border-primary/20">
+          <CardHeader>
+            <Input 
+              placeholder="Título de la nota..." 
+              value={newTitle} 
+              onChange={(e) => setNewTitle(e.target.value)}
+            />
+          </CardHeader>
+          <CardContent>
+            <Textarea 
+              placeholder="Escribe tu idea aquí..." 
+              value={newContent} 
+              onChange={(e) => setNewContent(e.target.value)}
+              className="min-h-[100px]"
+            />
+          </CardContent>
+          <CardFooter className="justify-end gap-2">
+            <Button variant="ghost" onClick={() => setIsAdding(false)}>Cancelar</Button>
+            <Button onClick={addNote}>Guardar Nota</Button>
+          </CardFooter>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {notes.map((note) => (
-          <Card key={note.id} className={cn(
-            "group relative hover:shadow-lg transition-all cursor-pointer border-t-4",
-            note.pinned ? "border-t-primary" : "border-t-muted"
-          )}>
-            <CardHeader className="pb-2">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-lg font-bold leading-tight line-clamp-2">
-                  {note.title}
-                </CardTitle>
-                <button className={cn(
-                  "opacity-0 group-hover:opacity-100 transition-opacity",
-                  note.pinned ? "text-primary opacity-100" : "text-muted-foreground hover:text-primary"
-                )}>
-                  <Pin className={cn("w-4 h-4", note.pinned && "fill-current")} />
-                </button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
-                {note.content}
-              </p>
-            </CardContent>
-            <CardFooter className="flex items-center justify-between pt-0 text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-              <span>{note.updatedAt}</span>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon" className="w-6 h-6 rounded-full hover:bg-secondary">
-                  <Edit3 className="w-3 h-3" />
-                </Button>
-                <Button variant="ghost" size="icon" className="w-6 h-6 rounded-full hover:bg-destructive/10 text-destructive">
+        {isLoading ? (
+          <div className="col-span-full p-12 flex justify-center"><Loader2 className="animate-spin text-primary" /></div>
+        ) : !notes || notes.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center p-20 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/5">
+             <BookOpen className="w-12 h-12 mb-4 opacity-10" />
+             <p className="font-bold">No hay notas todavía</p>
+             <p className="text-sm">Tus ideas brillantes aparecerán aquí.</p>
+          </div>
+        ) : (
+          notes.map((note: any) => (
+            <Card key={note.id} className={cn(
+              "group relative hover:shadow-lg transition-all cursor-pointer border-t-4",
+              note.pinned ? "border-t-primary" : "border-t-muted"
+            )}>
+              <CardHeader className="pb-2">
+                <div className="flex items-start justify-between">
+                  <CardTitle className="text-lg font-bold leading-tight line-clamp-2">
+                    {note.title}
+                  </CardTitle>
+                  <button 
+                    onClick={() => togglePin(note.id, note.pinned)}
+                    className={cn(
+                      "transition-opacity",
+                      note.pinned ? "text-primary opacity-100" : "text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100"
+                    )}
+                  >
+                    <Pin className={cn("w-4 h-4", note.pinned && "fill-current")} />
+                  </button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
+                  {note.content}
+                </p>
+              </CardContent>
+              <CardFooter className="flex items-center justify-between pt-0 text-[10px] text-muted-foreground font-bold uppercase">
+                <span>{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true, locale: es })}</span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="w-8 h-8 opacity-0 group-hover:opacity-100 text-destructive"
+                  onClick={() => removeNote(note.id)}
+                >
                   <Trash2 className="w-3 h-3" />
                 </Button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-        
-        {/* Marcador de creación de nota */}
-        <Card className="border-2 border-dashed flex flex-col items-center justify-center p-8 text-muted-foreground hover:bg-secondary/20 hover:border-primary/30 transition-all cursor-pointer">
-           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-              <Plus className="w-6 h-6" />
-           </div>
-           <p className="font-bold text-sm">Crear Nueva Nota</p>
-        </Card>
+              </CardFooter>
+            </Card>
+          ))
+        )}
       </div>
     </div>
   );

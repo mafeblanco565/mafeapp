@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -10,67 +11,97 @@ import {
   Sparkles, 
   Trash2, 
   ShoppingCart, 
-  Loader2,
-  CheckCircle2
+  Loader2
 } from "lucide-react";
 import { generateGroceryList, type GenerateGroceryListOutput } from "@/ai/flows/ai-grocery-list-generator";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
-type GroceryItem = {
-  id: string;
-  name: string;
-  quantity: string;
-  completed: boolean;
-};
+import { 
+  useFirestore, 
+  useUser, 
+  useCollection, 
+  useMemoFirebase,
+  addDocumentNonBlocking,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking 
+} from "@/firebase";
+import { collection, doc, serverTimestamp } from "firebase/firestore";
 
 export default function GroceryPage() {
-  const [items, setItems] = useState<GroceryItem[]>([
-    { id: "1", name: "Leche", quantity: "2L", completed: false },
-    { id: "2", name: "Huevos", quantity: "1 docena", completed: true },
-  ]);
+  const { user } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiTheme, setAiTheme] = useState("Cena de Pasta Italiana");
-  const { toast } = useToast();
+  const [aiTheme, setAiTheme] = useState("");
+
+  // Consulta de items (asumiendo una lista por defecto para simplificar el MVP)
+  const itemsQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, "users", user.uid, "groceryItems");
+  }, [firestore, user]);
+
+  const { data: items, isLoading } = useCollection(itemsQuery);
 
   const addItem = () => {
-    if (!newItem.trim()) return;
-    const item: GroceryItem = {
-      id: Math.random().toString(36).substr(2, 9),
+    if (!newItem.trim() || !user || !firestore) return;
+    
+    const colRef = collection(firestore, "users", user.uid, "groceryItems");
+    addDocumentNonBlocking(colRef, {
+      userId: user.uid,
       name: newItem,
       quantity: newQuantity || "1 unidad",
-      completed: false,
-    };
-    setItems([item, ...items]);
+      isPurchased: false,
+      suggestedByAI: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+
     setNewItem("");
     setNewQuantity("");
   };
 
-  const toggleItem = (id: string) => {
-    setItems(items.map(item => item.id === id ? { ...item, completed: !item.completed } : item));
+  const toggleItem = (id: string, currentStatus: boolean) => {
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, "users", user.uid, "groceryItems", id);
+    updateDocumentNonBlocking(docRef, { 
+      isPurchased: !currentStatus,
+      updatedAt: new Date().toISOString()
+    });
   };
 
   const removeItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+    if (!user || !firestore) return;
+    const docRef = doc(firestore, "users", user.uid, "groceryItems", id);
+    deleteDocumentNonBlocking(docRef);
   };
 
   const handleAiSuggest = async () => {
+    if (!aiTheme.trim() || !user || !firestore) return;
     setIsAiLoading(true);
     try {
       const result: GenerateGroceryListOutput = await generateGroceryList({ theme: aiTheme });
-      const newAiItems: GroceryItem[] = result.items.map(item => ({
-        id: Math.random().toString(36).substr(2, 9),
-        name: item.name,
-        quantity: item.quantity,
-        completed: false,
-      }));
-      setItems([...newAiItems, ...items]);
+      const colRef = collection(firestore, "users", user.uid, "groceryItems");
+      
+      for (const item of result.items) {
+        addDocumentNonBlocking(colRef, {
+          userId: user.uid,
+          name: item.name,
+          quantity: item.quantity,
+          isPurchased: false,
+          suggestedByAI: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+
       toast({
         title: "Sugerencias IA Añadidas",
-        description: `Se han añadido ${newAiItems.length} artículos basados en "${aiTheme}"`,
+        description: `Se han añadido ${result.items.length} artículos basados en "${aiTheme}"`,
       });
+      setAiTheme("");
     } catch (error) {
       toast({
         title: "Error en Generación IA",
@@ -124,28 +155,33 @@ export default function GroceryPage() {
           <Card>
             <CardContent className="p-0">
               <div className="divide-y">
-                {items.length === 0 && (
+                {isLoading && (
+                  <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando lista...
+                  </div>
+                )}
+                {!isLoading && items?.length === 0 && (
                   <div className="p-8 text-center text-muted-foreground">
                     Tu lista de compra está vacía. ¡Empieza a añadir artículos o usa sugerencias de IA!
                   </div>
                 )}
-                {items.map((item) => (
+                {items?.map((item: any) => (
                   <div 
                     key={item.id} 
                     className={cn(
                       "flex items-center gap-4 p-4 transition-colors group",
-                      item.completed ? "bg-muted/30" : "hover:bg-secondary/20"
+                      item.isPurchased ? "bg-muted/30" : "hover:bg-secondary/20"
                     )}
                   >
                     <Checkbox 
-                      checked={item.completed} 
-                      onCheckedChange={() => toggleItem(item.id)}
+                      checked={item.isPurchased} 
+                      onCheckedChange={() => toggleItem(item.id, item.isPurchased)}
                       className="w-5 h-5"
                     />
                     <div className="flex-1">
                       <p className={cn(
                         "font-medium",
-                        item.completed && "line-through text-muted-foreground"
+                        item.isPurchased && "line-through text-muted-foreground"
                       )}>
                         {item.name}
                       </p>
@@ -183,13 +219,13 @@ export default function GroceryPage() {
                 <Input 
                   value={aiTheme} 
                   onChange={(e) => setAiTheme(e.target.value)}
-                  placeholder="ej. Barbacoa en el jardín" 
+                  placeholder="ej. Cena de Pasta Italiana" 
                 />
               </div>
               <Button 
                 onClick={handleAiSuggest} 
                 className="w-full bg-accent hover:bg-accent/90 gap-2"
-                disabled={isAiLoading || !aiTheme}
+                disabled={isAiLoading || !aiTheme.trim()}
               >
                 {isAiLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -198,9 +234,6 @@ export default function GroceryPage() {
                 )}
                 Generar Lista con IA
               </Button>
-              <p className="text-[10px] text-center text-muted-foreground">
-                Impulsado por MB Focus GenAI Flows
-              </p>
             </CardContent>
           </Card>
 
@@ -211,15 +244,11 @@ export default function GroceryPage() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Artículos Totales:</span>
-                <span className="font-bold">{items.length}</span>
+                <span className="font-bold">{items?.length || 0}</span>
               </div>
               <div className="flex justify-between">
                 <span>Completado:</span>
-                <span className="font-bold text-green-600">{items.filter(i => i.completed).length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Pendiente:</span>
-                <span className="font-bold text-primary">{items.filter(i => !i.completed).length}</span>
+                <span className="font-bold text-green-600">{items?.filter((i: any) => i.isPurchased).length || 0}</span>
               </div>
             </CardContent>
           </Card>
