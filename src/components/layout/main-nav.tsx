@@ -47,11 +47,11 @@ export function MainNav() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-24 items-center justify-between px-4">
-        {/* Logo agrandado y sin texto al lado */}
+      <div className="container flex h-28 items-center justify-between px-4">
+        {/* Logo agrandado y sin texto */}
         <Link href="/" className="flex items-center">
           {logoImage && (
-            <div className="relative w-20 h-20 overflow-hidden rounded-lg transition-transform hover:scale-105">
+            <div className="relative w-28 h-28 overflow-hidden rounded-lg transition-transform hover:scale-105">
               <Image
                 src={logoImage.imageUrl}
                 alt="MBFOCUS"

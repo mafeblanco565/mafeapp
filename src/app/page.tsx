@@ -58,9 +58,9 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20 pt-4">
-      <div className="flex flex-col gap-4">
-        {/* Reemplazo de texto por Imagen 1.svg */}
-        <div className="relative w-64 h-24">
+      <div className="flex flex-col gap-6">
+        {/* Logo 1.svg mucho más grande en el Dashboard */}
+        <div className="relative w-full max-w-[450px] h-[140px]">
           <Image 
             src="/1.svg" 
             alt="MB FOCUS" 
@@ -158,3 +158,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+
