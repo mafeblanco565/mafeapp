@@ -22,32 +22,16 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
-      <body className="font-body antialiased bg-[#FDFCF8] min-h-screen flex flex-col lg:flex-row">
+      <body className="font-body antialiased bg-[#FDFCF8] min-h-screen flex flex-col">
         <FirebaseClientProvider>
-          <aside className="lg:w-64 fixed inset-y-0 left-0 hidden lg:block z-50">
-            <MainNav />
-          </aside>
-          
-          {/* Navbar móvil solo para el logo */}
-          <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b sticky top-0 z-40">
-             <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
-                  <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
-                </div>
-                <span className="font-bold text-primary tracking-tight uppercase">MB FOCUS</span>
-             </div>
-          </div>
+          {/* Navegación superior con hamburguesa */}
+          <MainNav />
 
-          <main className="flex-1 lg:ml-64 min-h-screen pb-20 lg:pb-0">
+          <main className="flex-1 min-h-screen">
             <div className="container mx-auto p-4 md:p-8 max-w-5xl">
               {children}
             </div>
           </main>
-          
-          {/* La navegación móvil está dentro de MainNav pero renderizada al final en pantallas pequeñas */}
-          <div className="lg:hidden">
-            <MainNav />
-          </div>
           
           <Toaster />
         </FirebaseClientProvider>
