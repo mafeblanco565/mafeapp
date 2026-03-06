@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -55,9 +54,11 @@ export default function TasksPage() {
   const addTask = () => {
     if (!newTitle.trim() || !user || !firestore || !date) return;
     const colRef = collection(firestore, "users", user.uid, "tasks");
+    
+    // Forzamos el almacenamiento como string ISO para consistencia
     addDocumentNonBlocking(colRef, {
       userId: user.uid,
-      title: newTitle,
+      title: newTitle.trim(),
       description: "",
       dueDate: date.toISOString(),
       priority,
@@ -92,10 +93,16 @@ export default function TasksPage() {
     Baja: "text-blue-600 bg-blue-50 border-blue-100",
   };
 
-  const safeParseDate = (dateStr: any) => {
-    if (!dateStr) return new Date();
-    const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr.seconds * 1000);
-    return isValid(d) ? d : new Date();
+  const safeParseDate = (dateVal: any) => {
+    if (!dateVal) return new Date();
+    if (typeof dateVal === 'string') {
+      const d = parseISO(dateVal);
+      return isValid(d) ? d : new Date();
+    }
+    if (dateVal && typeof dateVal === 'object' && 'seconds' in dateVal) {
+      return new Date(dateVal.seconds * 1000);
+    }
+    return new Date();
   };
 
   const filteredTasks = (filter: string) => {
@@ -108,59 +115,70 @@ export default function TasksPage() {
     }
   };
 
-  if (!mounted) return null;
+  if (!mounted) return (
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
+  );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-headline font-bold text-primary">Tareas</h1>
-          <p className="text-muted-foreground">Organiza tus metas y mantente productivo.</p>
-        </div>
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-3xl font-headline font-bold text-primary">Tareas</h1>
+        <p className="text-muted-foreground">Gestiona tus objetivos diarios y mantén el enfoque.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         <div className="lg:col-span-1 space-y-4">
           <Card className="bg-primary/5 border-primary/10">
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-primary">Añadir Tarea</CardTitle>
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-semibold uppercase tracking-wider text-primary">Añadir Nueva</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <Input 
-                placeholder="Nombre de la tarea..." 
-                value={newTitle} 
-                onChange={(e) => setNewTitle(e.target.value)}
-              />
-              <Select value={priority} onValueChange={setPriority}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Prioridad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Alta">Alta</SelectItem>
-                  <SelectItem value="Media">Media</SelectItem>
-                  <SelectItem value="Baja">Baja</SelectItem>
-                </SelectContent>
-              </Select>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Input 
+                  placeholder="¿Qué tienes que hacer?" 
+                  value={newTitle} 
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addTask()}
+                />
+              </div>
               
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP", { locale: es }) : "Elegir fecha"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="space-y-2">
+                <Select value={priority} onValueChange={setPriority}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Prioridad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Alta">Prioridad Alta</SelectItem>
+                    <SelectItem value="Media">Prioridad Media</SelectItem>
+                    <SelectItem value="Baja">Prioridad Baja</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start text-left font-normal h-10 border-input bg-background">
+                      <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                      {date ? format(date, "d 'de' MMM, yyyy", { locale: es }) : "Elegir fecha"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
 
-              <Button className="w-full gap-2" onClick={addTask}>
-                <Plus className="w-4 h-4" /> Crear
+              <Button className="w-full gap-2 font-bold shadow-sm" onClick={addTask} disabled={!newTitle.trim()}>
+                <Plus className="w-4 h-4" /> Crear Tarea
               </Button>
             </CardContent>
           </Card>
@@ -168,69 +186,72 @@ export default function TasksPage() {
 
         <div className="lg:col-span-3">
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="mb-4">
-              <TabsTrigger value="all">Todas</TabsTrigger>
-              <TabsTrigger value="today">Hoy</TabsTrigger>
-              <TabsTrigger value="upcoming">Próximas</TabsTrigger>
-              <TabsTrigger value="completed">Hechas</TabsTrigger>
+            <TabsList className="mb-6 bg-muted/50 p-1 rounded-xl">
+              <TabsTrigger value="all" className="rounded-lg">Todas</TabsTrigger>
+              <TabsTrigger value="today" className="rounded-lg">Hoy</TabsTrigger>
+              <TabsTrigger value="upcoming" className="rounded-lg">Próximas</TabsTrigger>
+              <TabsTrigger value="completed" className="rounded-lg">Hechas</TabsTrigger>
             </TabsList>
 
             {["all", "today", "upcoming", "completed"].map((tab) => (
               <TabsContent key={tab} value={tab} className="mt-0 space-y-3">
-                {isLoading && (
-                  <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando...
+                {isLoading ? (
+                  <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    <p className="text-sm font-medium">Buscando tus tareas...</p>
                   </div>
-                )}
-                {!isLoading && filteredTasks(tab).length === 0 && (
-                  <div className="flex flex-col items-center justify-center p-12 text-muted-foreground bg-muted/20 rounded-lg border-2 border-dashed">
-                    <AlertCircle className="w-8 h-8 mb-2 opacity-20" />
-                    <p>No hay tareas en esta categoría.</p>
+                ) : filteredTasks(tab).length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-16 text-muted-foreground bg-muted/20 rounded-2xl border-2 border-dashed">
+                    <AlertCircle className="w-10 h-10 mb-3 opacity-20" />
+                    <p className="font-medium text-sm">No hay tareas en esta sección.</p>
                   </div>
-                )}
-                {filteredTasks(tab).map((task: any) => (
-                  <Card key={task.id} className={cn(
-                    "hover:shadow-md transition-shadow cursor-pointer group",
-                    task.isCompleted && "opacity-60"
-                  )}>
-                    <CardContent className="p-4 flex items-center gap-4">
-                      <button 
-                        onClick={() => toggleTask(task.id, task.isCompleted)}
-                        className={cn(
-                          "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
-                          task.isCompleted ? "bg-green-500 border-green-500 text-white" : "border-muted-foreground hover:border-primary"
-                        )}
-                      >
-                        {task.isCompleted && <CheckCircle2 className="w-4 h-4" />}
-                      </button>
-                      <div className="flex-1">
-                        <h3 className={cn("font-medium", task.isCompleted && "line-through")}>
-                          {task.title}
-                        </h3>
-                        <div className="flex items-center gap-4 mt-1">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <CalendarIcon className="w-3 h-3" />
-                            {format(safeParseDate(task.dueDate), "d 'de' MMM", { locale: es })}
-                          </span>
-                          <span className={cn(
-                            "text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase",
-                            priorityColors[task.priority as keyof typeof priorityColors]
-                          )}>
-                            {task.priority}
-                          </span>
+                ) : (
+                  filteredTasks(tab).map((task: any) => (
+                    <Card key={task.id} className={cn(
+                      "group transition-all hover:shadow-md cursor-pointer border-l-4",
+                      task.isCompleted ? "opacity-60 border-l-muted" : 
+                      task.priority === 'Alta' ? "border-l-red-500" :
+                      task.priority === 'Media' ? "border-l-orange-400" : "border-l-blue-400"
+                    )}>
+                      <CardContent className="p-4 flex items-center gap-4">
+                        <button 
+                          onClick={() => toggleTask(task.id, task.isCompleted)}
+                          className={cn(
+                            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+                            task.isCompleted ? "bg-green-500 border-green-500 text-white" : "border-muted-foreground hover:border-primary"
+                          )}
+                        >
+                          {task.isCompleted && <CheckCircle2 className="w-4 h-4" />}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <h3 className={cn("font-bold text-sm truncate", task.isCompleted && "line-through text-muted-foreground")}>
+                            {task.title}
+                          </h3>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-bold">
+                              <CalendarIcon className="w-3 h-3" />
+                              {format(safeParseDate(task.dueDate), "d 'de' MMM", { locale: es })}
+                            </span>
+                            <Badge variant="outline" className={cn(
+                              "text-[9px] px-2 py-0 h-4 border font-bold uppercase tracking-wider",
+                              priorityColors[task.priority as keyof typeof priorityColors]
+                            )}>
+                              {task.priority}
+                            </Badge>
+                          </div>
                         </div>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="opacity-0 group-hover:opacity-100 text-destructive"
-                        onClick={() => removeTask(task.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8 transition-opacity"
+                          onClick={() => removeTask(task.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </TabsContent>
             ))}
           </Tabs>

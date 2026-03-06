@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,7 +12,7 @@ import {
   ShoppingCart, 
   Loader2
 } from "lucide-react";
-import { generateGroceryList, type GenerateGroceryListOutput } from "@/ai/flows/ai-grocery-list-generator";
+import { generateGroceryList } from "@/ai/flows/ai-grocery-list-generator";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { 
@@ -86,30 +85,34 @@ export default function GroceryPage() {
     if (!aiTheme.trim() || !user || !firestore) return;
     setIsAiLoading(true);
     try {
-      const result: GenerateGroceryListOutput = await generateGroceryList({ theme: aiTheme });
-      const colRef = collection(firestore, "users", user.uid, "groceryItems");
-      
-      for (const item of result.items) {
-        addDocumentNonBlocking(colRef, {
-          userId: user.uid,
-          name: item.name,
-          quantity: item.quantity,
-          isPurchased: false,
-          suggestedByAI: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
-      }
+      const result = await generateGroceryList({ theme: aiTheme });
+      if (result && result.items) {
+        const colRef = collection(firestore, "users", user.uid, "groceryItems");
+        
+        // Añadir items secuencialmente para evitar saturación si fuera necesario
+        for (const item of result.items) {
+          addDocumentNonBlocking(colRef, {
+            userId: user.uid,
+            name: item.name,
+            quantity: item.quantity,
+            isPurchased: false,
+            suggestedByAI: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
+        }
 
-      toast({
-        title: "Sugerencias listas",
-        description: `Añadidos artículos para "${aiTheme}"`,
-      });
-      setAiTheme("");
+        toast({
+          title: "Sugerencias listas",
+          description: `Se han añadido ${result.items.length} artículos para "${aiTheme}"`,
+        });
+        setAiTheme("");
+      }
     } catch (error) {
+      console.error("AI Error:", error);
       toast({
-        title: "Error IA",
-        description: "Inténtalo de nuevo en unos momentos.",
+        title: "Error de IA",
+        description: "Hubo un problema al generar la lista. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -132,7 +135,7 @@ export default function GroceryPage() {
           <ShoppingCart className="w-8 h-8" />
           Compras
         </h1>
-        <p className="text-muted-foreground text-sm">Organiza tu lista de mercado fácilmente.</p>
+        <p className="text-muted-foreground text-sm">Organiza tu lista de mercado fácilmente con ayuda de IA.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -151,8 +154,8 @@ export default function GroceryPage() {
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
                 />
                 <Input 
-                  placeholder="Cantidad" 
-                  className="w-24"
+                  placeholder="Cant." 
+                  className="w-20"
                   value={newQuantity}
                   onChange={(e) => setNewQuantity(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem()}
@@ -169,11 +172,11 @@ export default function GroceryPage() {
               <div className="divide-y">
                 {isLoading ? (
                   <div className="p-8 text-center text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando...
+                    <Loader2 className="w-4 h-4 animate-spin" /> Cargando lista...
                   </div>
                 ) : !items || items.length === 0 ? (
                   <div className="p-12 text-center text-muted-foreground bg-muted/5">
-                    <p className="text-sm">Lista vacía. ¡Añade algo!</p>
+                    <p className="text-sm">Tu lista de compras está vacía.</p>
                   </div>
                 ) : (
                   items.map((item: any) => (
@@ -220,15 +223,17 @@ export default function GroceryPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-accent text-md">
                 <Sparkles className="w-5 h-5" />
-                Sugerencias IA
+                Asistente IA
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">Escribe un plato o tipo de dieta y la IA generará los ingredientes por ti.</p>
               <Input 
                 value={aiTheme} 
                 onChange={(e) => setAiTheme(e.target.value)}
-                placeholder="Ej. Desayuno Saludable" 
+                placeholder="Ej. Lasaña de carne" 
                 className="text-sm"
+                onKeyDown={(e) => e.key === 'Enter' && handleAiSuggest()}
               />
               <Button 
                 onClick={handleAiSuggest} 
@@ -236,7 +241,7 @@ export default function GroceryPage() {
                 disabled={isAiLoading || !aiTheme.trim()}
               >
                 {isAiLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                Generar
+                {isAiLoading ? "Generando..." : "Sugerir Ingredientes"}
               </Button>
             </CardContent>
           </Card>

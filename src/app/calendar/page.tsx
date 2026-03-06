@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -9,7 +8,6 @@ import {
   ChevronRight, 
   Plus,
   Loader2,
-  Clock,
   Trash2,
   CheckCircle2
 } from "lucide-react";
@@ -73,42 +71,55 @@ export default function CalendarPage() {
 
   const safeParseDate = (dateVal: any) => {
     if (!dateVal) return null;
+    
+    // Si es un string ISO
     if (typeof dateVal === 'string') {
       const parsed = parseISO(dateVal);
       return isValid(parsed) ? parsed : null;
     }
-    if (dateVal.seconds) {
+    
+    // Si es un Timestamp de Firestore
+    if (dateVal && typeof dateVal === 'object' && 'seconds' in dateVal) {
       return new Date(dateVal.seconds * 1000);
     }
+    
+    // Si ya es un objeto Date
+    if (dateVal instanceof Date) {
+      return isValid(dateVal) ? dateVal : null;
+    }
+
     return null;
   };
 
   const calendarEvents = useMemo(() => {
     const events: any[] = [];
+    
     tasks?.forEach(task => {
       const date = safeParseDate(task.dueDate);
       if (date) {
         events.push({
           ...task,
           type: 'task',
-          date,
+          displayDate: date,
           color: task.priority === 'Alta' ? 'bg-red-500' : task.priority === 'Media' ? 'bg-orange-400' : 'bg-blue-400',
           title: task.title
         });
       }
     });
+
     bills?.forEach(bill => {
       const date = safeParseDate(bill.dueDate);
       if (date) {
         events.push({
           ...bill,
           type: 'bill',
-          date,
+          displayDate: date,
           color: 'bg-emerald-500',
           title: `Factura: ${bill.name}`
         });
       }
     });
+
     return events;
   }, [tasks, bills]);
 
@@ -133,7 +144,10 @@ export default function CalendarPage() {
     if (!selectedEvent || !user || !firestore) return;
     const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
     const docRef = doc(firestore, "users", user.uid, path, selectedEvent.id);
-    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' ? { status, isCompleted: status === 'Completada' } : { paymentStatus: status, isPaid: status === 'Pagado' });
+    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' 
+      ? { status, isCompleted: status === 'Completada', updatedAt: new Date().toISOString() } 
+      : { paymentStatus: status, isPaid: status === 'Pagado', updatedAt: new Date().toISOString() }
+    );
     setIsSheetOpen(false);
   };
 
@@ -150,7 +164,7 @@ export default function CalendarPage() {
           <CalendarIcon className="w-8 h-8" />
           Agenda
         </h1>
-        <p className="text-muted-foreground text-sm">Vista simplificada de tus compromisos semanales.</p>
+        <p className="text-muted-foreground text-sm">Visualiza tus compromisos semanales de un vistazo.</p>
       </div>
 
       <div className="flex items-center justify-between bg-white p-4 rounded-2xl border shadow-sm">
@@ -166,19 +180,19 @@ export default function CalendarPage() {
         </div>
         <Link href="/tasks">
           <Button size="sm" className="rounded-full gap-2">
-            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Nueva Tarea</span>
+            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Añadir</span>
           </Button>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
         {weekDays.map((day, i) => {
-          const dayEvents = calendarEvents.filter(event => isSameDay(event.date, day));
+          const dayEvents = calendarEvents.filter(event => isSameDay(event.displayDate, day));
           const isToday = isSameDay(day, new Date());
           
           return (
             <div key={i} className={cn(
-              "flex flex-col min-h-[160px] bg-white rounded-xl border shadow-sm overflow-hidden transition-all",
+              "flex flex-col min-h-[140px] bg-white rounded-xl border shadow-sm overflow-hidden transition-all",
               isToday ? "ring-2 ring-primary ring-inset" : ""
             )}>
               <div className={cn(
@@ -189,21 +203,21 @@ export default function CalendarPage() {
                 <p className="text-lg font-bold">{format(day, "d")}</p>
               </div>
               
-              <div className="flex-1 p-2 space-y-1 overflow-y-auto max-h-[250px]">
+              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[220px]">
                 {dayEvents.length === 0 ? (
-                  <p className="text-[9px] text-center text-muted-foreground mt-4 italic">Vacío</p>
+                  <p className="text-[10px] text-center text-muted-foreground mt-4 italic opacity-40">Sin planes</p>
                 ) : (
                   dayEvents.map((event) => (
                     <div
                       key={event.id}
                       onClick={() => handleEventClick(event)}
                       className={cn(
-                        "p-1.5 rounded-lg text-[10px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.02]",
+                        "p-2 rounded-lg text-[10px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.03] active:scale-95",
                         event.color,
-                        event.isCompleted || event.isPaid ? "opacity-50 line-through" : ""
+                        (event.isCompleted || event.isPaid) && "opacity-40 grayscale-[0.5] line-through"
                       )}
                     >
-                      <p className="truncate">{event.title}</p>
+                      <p className="line-clamp-2 leading-tight">{event.title}</p>
                     </div>
                   ))
                 )}
@@ -214,46 +228,44 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-3xl h-[50vh]">
+        <SheetContent side="bottom" className="rounded-t-3xl h-[45vh]">
           {selectedEvent ? (
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto space-y-6">
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2 text-xl font-bold">
                   <div className={cn("w-3 h-3 rounded-full", selectedEvent.color)} />
                   {selectedEvent.title}
                 </SheetTitle>
-                <SheetDescription>
-                  Programado para el {selectedEvent.date && format(selectedEvent.date, "d 'de' MMMM", { locale: es })}
+                <SheetDescription className="font-medium">
+                  {selectedEvent.displayDate && format(selectedEvent.displayDate, "EEEE d 'de' MMMM", { locale: es })}
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="py-6 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-xl font-bold"
+                  onClick={handleDeleteEvent}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" /> Eliminar
+                </Button>
+                {selectedEvent.type === 'task' ? (
                   <Button 
-                    variant="outline" 
-                    className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-xl font-bold"
-                    onClick={handleDeleteEvent}
+                    className="w-full rounded-xl font-bold"
+                    onClick={() => handleUpdateStatus('Completada')}
+                    disabled={selectedEvent.isCompleted}
                   >
-                    <Trash2 className="w-4 h-4 mr-2" /> Borrar
+                    {selectedEvent.isCompleted ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Marcar Hecha"}
                   </Button>
-                  {selectedEvent.type === 'task' ? (
-                    <Button 
-                      className="w-full rounded-xl font-bold"
-                      onClick={() => handleUpdateStatus('Completada')}
-                      disabled={selectedEvent.isCompleted}
-                    >
-                      {selectedEvent.isCompleted ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Completar"}
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold"
-                      onClick={() => handleUpdateStatus('Pagado')}
-                      disabled={selectedEvent.isPaid}
-                    >
-                      {selectedEvent.isPaid ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Pagar"}
-                    </Button>
-                  )}
-                </div>
+                ) : (
+                  <Button 
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl font-bold"
+                    onClick={() => handleUpdateStatus('Pagado')}
+                    disabled={selectedEvent.isPaid}
+                  >
+                    {selectedEvent.isPaid ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Marcar Pagada"}
+                  </Button>
+                )}
               </div>
             </div>
           ) : (

@@ -27,23 +27,22 @@ const groceryListPrompt = ai.definePrompt({
   name: 'groceryListPrompt',
   input: {schema: GenerateGroceryListInputSchema},
   output: {schema: GenerateGroceryListOutputSchema},
-  prompt: `Eres un asistente útil que genera listas de compras.
-Basándote en el siguiente tema o comida, genera una lista de compras completa con cantidades sugeridas.
-La salida debe ser un objeto JSON que contenga un array de artículos, donde cada artículo tiene un campo 'name' y un campo 'quantity'.
-IMPORTANTE: Todos los nombres de los artículos y las cantidades deben estar en ESPAÑOL.
+  prompt: `Eres un experto asistente de compras y nutrición. 
+Tu tarea es generar una lista de compras completa y lógica basada en el tema o comida proporcionado: "{{{theme}}}".
 
-Tema/Comida: {{{theme}}}
+INSTRUCCIONES:
+1. Genera una lista de entre 5 y 10 artículos esenciales.
+2. Incluye cantidades realistas para cada artículo.
+3. Todo el contenido (nombres y cantidades) DEBE estar en ESPAÑOL.
+4. Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 
-Ejemplo de Salida:
+Ejemplo:
 {
   "items": [
-    { "name": "Salchichas", "quantity": "1 paquete" },
-    { "name": "Pan de hot dog", "quantity": "1 paquete" },
-    { "name": "Ketchup", "quantity": "1 botella" },
-    { "name": "Mostaza", "quantity": "1 botella" }
+    { "name": "Leche entera", "quantity": "2 litros" },
+    { "name": "Huevos", "quantity": "1 docena" }
   ]
-}
-`,
+}`,
 });
 
 const aiGroceryListGeneratorFlow = ai.defineFlow(
@@ -54,7 +53,8 @@ const aiGroceryListGeneratorFlow = ai.defineFlow(
   },
   async (input) => {
     const {output} = await groceryListPrompt(input);
-    return output!;
+    if (!output) throw new Error('No se pudo generar la lista de compras.');
+    return output;
   }
 );
 
