@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,19 +25,23 @@ import {
   updateDocumentNonBlocking,
   deleteDocumentNonBlocking 
 } from "@/firebase";
-import { collection, doc, serverTimestamp } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
 
 export default function GroceryPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [newItem, setNewItem] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiTheme, setAiTheme] = useState("");
 
-  // Consulta de items (asumiendo una lista por defecto para simplificar el MVP)
   const itemsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, "users", user.uid, "groceryItems");
@@ -112,6 +116,8 @@ export default function GroceryPage() {
       setIsAiLoading(false);
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
@@ -190,7 +196,7 @@ export default function GroceryPage() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="opacity-0 group-hover:opacity-100 text-destructive hover:bg-destructive/10"
+                      className="opacity-0 group-hover:opacity-100 text-destructive"
                       onClick={() => removeItem(item.id)}
                     >
                       <Trash2 className="w-4 h-4" />

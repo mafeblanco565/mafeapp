@@ -11,8 +11,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  LineChart, 
-  Line,
   AreaChart,
   Area
 } from "recharts";
@@ -23,32 +21,47 @@ import {
   ShieldCheck, 
   ArrowUpRight, 
   MoreHorizontal,
-  Mail,
   Search,
-  Loader2
+  Loader2,
+  Lock,
+  Download,
+  RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { toast } from "@/hooks/use-toast";
 
 const data = [
-  { name: "Lun", users: 4000, interactions: 2400 },
-  { name: "Mar", users: 3000, interactions: 1398 },
-  { name: "Mié", users: 2000, interactions: 9800 },
-  { name: "Jue", users: 2780, interactions: 3908 },
-  { name: "Vie", users: 1890, interactions: 4800 },
-  { name: "Sáb", users: 2390, interactions: 3800 },
-  { name: "Dom", users: 3490, interactions: 4300 },
+  { name: "Lun", users: 120, interactions: 450 },
+  { name: "Mar", users: 150, interactions: 520 },
+  { name: "Mié", users: 180, interactions: 800 },
+  { name: "Jue", users: 170, interactions: 600 },
+  { name: "Vie", users: 210, interactions: 950 },
+  { name: "Sáb", users: 250, interactions: 1200 },
+  { name: "Dom", users: 280, interactions: 1100 },
 ];
 
 export default function AdminDashboard() {
+  const { user } = useUser();
+  const firestore = useFirestore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
+  // Verificar si el usuario actual es administrador
+  const adminDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, "adminRoles", user.uid);
+  }, [firestore, user]);
+
+  const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminDocRef);
+
+  if (!mounted || isAdminLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -56,30 +69,57 @@ export default function AdminDashboard() {
     );
   }
 
+  // Si no es admin, mostrar pantalla de bloqueo
+  if (!adminRole) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4 text-center animate-in fade-in zoom-in duration-500">
+        <div className="bg-destructive/10 p-6 rounded-full">
+          <Lock className="w-12 h-12 text-destructive" />
+        </div>
+        <h2 className="text-2xl font-bold">Acceso Restringido</h2>
+        <p className="text-muted-foreground max-w-md">
+          Este panel es exclusivo para el superusuario de MB FOCUS. Tu ID de usuario ({user?.uid.substring(0, 8)}...) no tiene privilegios administrativos.
+        </p>
+        <Button variant="outline" asChild><a href="/">Volver al Inicio</a></Button>
+      </div>
+    );
+  }
+
+  const handleAction = (actionName: string) => {
+    toast({
+      title: actionName,
+      description: "Esta función estará disponible en la próxima actualización del sistema.",
+    });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2">
             <ShieldCheck className="w-8 h-8" />
-            Panel de Administración
+            Panel Maestro
           </h1>
-          <p className="text-muted-foreground">Estado del sistema y analíticas de usuario.</p>
+          <p className="text-muted-foreground">Monitorización global y gestión de recursos.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm">Descargar Informe</Button>
-          <Button size="sm">Reiniciar Sistema</Button>
+          <Button variant="outline" size="sm" onClick={() => handleAction("Exportar Datos")} className="gap-2">
+            <Download className="w-4 h-4" /> Informe
+          </Button>
+          <Button size="sm" onClick={() => handleAction("Reinicio de caché")} className="gap-2">
+            <RefreshCw className="w-4 h-4" /> Reiniciar
+          </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Usuarios Totales", value: "12,842", change: "+12%", icon: Users },
-          { label: "Activos Ahora", value: "1,402", change: "+5%", icon: Activity },
-          { label: "Almacenamiento", value: "42.8 GB", change: "24%", icon: Database },
-          { label: "Llamadas API", value: "245k", change: "+18%", icon: MoreHorizontal },
+          { label: "Usuarios Totales", value: "1", change: "+0%", icon: Users },
+          { label: "Activos Ahora", value: "1", change: "+100%", icon: Activity },
+          { label: "BBDD", value: "2.4 MB", change: "Bajo", icon: Database },
+          { label: "Sincronización", value: "Ok", change: "100%", icon: MoreHorizontal },
         ].map((stat, i) => (
-          <Card key={i}>
+          <Card key={i} className="hover:shadow-md transition-all">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xs font-bold text-muted-foreground uppercase">{stat.label}</CardTitle>
               <stat.icon className="w-4 h-4 text-primary" />
@@ -88,7 +128,7 @@ export default function AdminDashboard() {
               <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
                 <ArrowUpRight className="w-3 h-3" />
-                {stat.change} <span className="text-muted-foreground ml-1">vs mes anterior</span>
+                {stat.change} <span className="text-muted-foreground ml-1">estado real</span>
               </p>
             </CardContent>
           </Card>
@@ -98,26 +138,25 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Tendencias de Interacción</CardTitle>
-            <CardDescription>Sesiones e interacciones diarias activas.</CardDescription>
+            <CardTitle>Actividad del Sistema</CardTitle>
+            <CardDescription>Interacciones de usuario en tiempo real.</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data}>
                 <defs>
-                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient id="colorInteractions" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
                     <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--muted))" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                  labelFormatter={(label) => `Día: ${label}`}
                 />
-                <Area type="monotone" dataKey="interactions" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorUsers)" />
+                <Area type="monotone" dataKey="interactions" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorInteractions)" />
               </AreaChart>
             </ResponsiveContainer>
           </CardContent>
@@ -126,37 +165,34 @@ export default function AdminDashboard() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Usuarios Recientes</CardTitle>
-              <CardDescription>Monitoriza registros y estado.</CardDescription>
+              <CardTitle>Sesiones Activas</CardTitle>
+              <CardDescription>Usuarios conectados actualmente.</CardDescription>
             </div>
-            <div className="relative w-48">
+            <div className="relative w-40">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Buscar usuarios..." className="pl-9 h-8 text-xs" />
+              <Input placeholder="Filtrar..." className="pl-9 h-8 text-xs rounded-full" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {[
-                { name: "Juan Pérez", email: "juan@example.com", status: "Activo", time: "hace 2m" },
-                { name: "Ana García", email: "ana@gmail.com", status: "Desconectado", time: "hace 15m" },
-                { name: "Roberto Fox", email: "robert@outlook.com", status: "Activo", time: "hace 1h" },
-                { name: "Emily Brown", email: "emily@focus.ai", status: "Baneado", time: "hace 3h" },
-              ].map((user, i) => (
-                <div key={i} className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary/50 transition-colors">
+                { name: user?.displayName || "Tú (Admin)", email: user?.email || "Superusuario", status: "Activo", time: "Ahora" },
+              ].map((userItem, i) => (
+                <div key={i} className="flex items-center justify-between p-3 rounded-xl border bg-card hover:bg-secondary/20 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
-                      {user.name.charAt(0)}
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                      {userItem.name.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-medium leading-none">{user.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{user.email}</p>
+                      <p className="text-sm font-bold leading-none">{userItem.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{userItem.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Badge variant={user.status === "Activo" ? "default" : user.status === "Baneado" ? "destructive" : "secondary"}>
-                      {user.status}
+                    <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                      {userItem.status}
                     </Badge>
-                    <span className="text-[10px] text-muted-foreground font-bold">{user.time}</span>
+                    <span className="text-[10px] text-muted-foreground font-bold">{userItem.time}</span>
                   </div>
                 </div>
               ))}

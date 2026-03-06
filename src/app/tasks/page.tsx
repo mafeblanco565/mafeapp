@@ -1,12 +1,14 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { 
   CheckCircle2, 
   Calendar as CalendarIcon, 
@@ -16,7 +18,7 @@ import {
   AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, isToday, isFuture } from "date-fns";
+import { format, isToday, isFuture, parseISO, isValid } from "date-fns";
 import { es } from "date-fns/locale";
 import { 
   useFirestore, 
@@ -33,9 +35,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export default function TasksPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [newTitle, setNewTitle] = useState("");
   const [priority, setPriority] = useState("Media");
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   const tasksQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -45,13 +53,13 @@ export default function TasksPage() {
   const { data: tasks, isLoading } = useCollection(tasksQuery);
 
   const addTask = () => {
-    if (!newTitle.trim() || !user || !firestore) return;
+    if (!newTitle.trim() || !user || !firestore || !date) return;
     const colRef = collection(firestore, "users", user.uid, "tasks");
     addDocumentNonBlocking(colRef, {
       userId: user.uid,
       title: newTitle,
       description: "",
-      dueDate: new Date().toISOString(),
+      dueDate: date.toISOString(),
       priority,
       status: "Pendiente",
       isCompleted: false,
@@ -59,6 +67,7 @@ export default function TasksPage() {
       updatedAt: new Date().toISOString()
     });
     setNewTitle("");
+    setDate(new Date());
   };
 
   const toggleTask = (id: string, currentStatus: boolean) => {
@@ -83,15 +92,23 @@ export default function TasksPage() {
     Baja: "text-blue-600 bg-blue-50 border-blue-100",
   };
 
+  const safeParseDate = (dateStr: any) => {
+    if (!dateStr) return new Date();
+    const d = typeof dateStr === 'string' ? parseISO(dateStr) : new Date(dateStr.seconds * 1000);
+    return isValid(d) ? d : new Date();
+  };
+
   const filteredTasks = (filter: string) => {
     if (!tasks) return [];
     switch(filter) {
-      case "today": return tasks.filter((t: any) => isToday(new Date(t.dueDate)));
-      case "upcoming": return tasks.filter((t: any) => isFuture(new Date(t.dueDate)) && !t.isCompleted);
+      case "today": return tasks.filter((t: any) => isToday(safeParseDate(t.dueDate)));
+      case "upcoming": return tasks.filter((t: any) => isFuture(safeParseDate(t.dueDate)) && !t.isCompleted);
       case "completed": return tasks.filter((t: any) => t.isCompleted);
       default: return tasks;
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -113,7 +130,6 @@ export default function TasksPage() {
                 placeholder="Nombre de la tarea..." 
                 value={newTitle} 
                 onChange={(e) => setNewTitle(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && addTask()}
               />
               <Select value={priority} onValueChange={setPriority}>
                 <SelectTrigger>
@@ -125,6 +141,24 @@ export default function TasksPage() {
                   <SelectItem value="Baja">Baja</SelectItem>
                 </SelectContent>
               </Select>
+              
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP", { locale: es }) : "Elegir fecha"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+
               <Button className="w-full gap-2" onClick={addTask}>
                 <Plus className="w-4 h-4" /> Crear
               </Button>
@@ -176,7 +210,7 @@ export default function TasksPage() {
                         <div className="flex items-center gap-4 mt-1">
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <CalendarIcon className="w-3 h-3" />
-                            {format(new Date(task.dueDate), "d 'de' MMM", { locale: es })}
+                            {format(safeParseDate(task.dueDate), "d 'de' MMM", { locale: es })}
                           </span>
                           <span className={cn(
                             "text-[10px] px-2 py-0.5 rounded-full border font-bold uppercase",

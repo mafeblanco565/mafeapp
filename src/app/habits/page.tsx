@@ -1,11 +1,11 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle2, Plus, Flame, Award, Target, Trash2, Loader2 } from "lucide-react";
+import { CheckCircle2, Plus, Flame, Award, Target, Trash2, Loader2, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
   useFirestore, 
@@ -13,16 +13,22 @@ import {
   useCollection, 
   useMemoFirebase,
   addDocumentNonBlocking,
+  updateDocumentNonBlocking,
   deleteDocumentNonBlocking 
 } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
 
-const daysOfWeek = ["L", "M", "X", "J", "V", "S", "D"];
+const daysOfWeek = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 export default function HabitsPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [mounted, setMounted] = useState(false);
   const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const habitsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -42,10 +48,26 @@ export default function HabitsPage() {
       startDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      // Para simplificar el MVP, guardamos un array fijo de checks
+      // Array de 7 días (L-D)
       days: [false, false, false, false, false, false, false]
     });
     setNewName("");
+  };
+
+  const toggleDay = (habit: any, dayIndex: number) => {
+    if (!user || !firestore) return;
+    const newDays = [...habit.days];
+    newDays[dayIndex] = !newDays[dayIndex];
+    
+    // Cálculo de racha simple basado en los checks actuales
+    const streak = newDays.filter(d => d).length;
+
+    const docRef = doc(firestore, "users", user.uid, "habits", habit.id);
+    updateDocumentNonBlocking(docRef, { 
+      days: newDays,
+      streak,
+      updatedAt: new Date().toISOString()
+    });
   };
 
   const removeHabit = (id: string) => {
@@ -53,6 +75,8 @@ export default function HabitsPage() {
     const docRef = doc(firestore, "users", user.uid, "habits", id);
     deleteDocumentNonBlocking(docRef);
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-8 animate-in zoom-in-95 duration-500">
@@ -92,26 +116,43 @@ export default function HabitsPage() {
           </div>
         ) : (
           habits.map((habit: any) => (
-            <Card key={habit.id} className="overflow-hidden group">
-              <CardContent className="p-0">
-                <div className="flex flex-col md:flex-row items-stretch md:items-center">
-                  <div className="flex-1 p-6">
-                    <div className="flex items-center justify-between mb-4">
+            <Card key={habit.id} className="overflow-hidden group hover:shadow-md transition-all">
+              <CardContent className="p-6">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-primary/10 p-2 rounded-lg">
+                        <Target className="w-5 h-5 text-primary" />
+                      </div>
                       <h3 className="font-bold text-lg">{habit.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-xs font-bold">
+                        <Flame className="w-3 h-3" /> {habit.streak || 0} Logros
+                      </div>
                       <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 text-destructive" onClick={() => removeHabit(habit.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <div className="flex gap-2">
-                      {daysOfWeek.map((day, i) => (
-                        <div key={i} className="flex flex-col items-center gap-1 flex-1">
-                          <span className="text-[10px] text-muted-foreground font-bold">{day}</span>
-                          <div className="w-full aspect-square rounded-md border-2 bg-muted/20 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors">
-                            {/* Simulación visual de interactividad */}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-7 gap-2">
+                    {daysOfWeek.map((day, i) => (
+                      <div key={i} className="flex flex-col items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase">{day}</span>
+                        <button 
+                          onClick={() => toggleDay(habit, i)}
+                          className={cn(
+                            "w-full aspect-square rounded-xl border-2 transition-all flex items-center justify-center",
+                            habit.days && habit.days[i] 
+                              ? "bg-primary border-primary text-white shadow-sm" 
+                              : "bg-muted/10 border-muted-foreground/10 hover:border-primary/50 text-transparent"
+                          )}
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
