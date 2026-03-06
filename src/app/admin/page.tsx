@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUser, useFirestore, useDoc, useMemoFirebase, useCollection } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const activityData = [
   { name: "Lun", val: 40 },
