@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,9 @@ import {
   Flame, 
   Zap, 
   DollarSign,
-  ShoppingCart
+  ShoppingCart,
+  Calendar as CalendarIcon,
+  Plus
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
@@ -37,85 +38,91 @@ export default function DashboardPage() {
   const pendingBills = bills?.reduce((acc: number, b: any) => !b.isPaid ? acc + b.amount : acc, 0) || 0;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-headline font-bold tracking-tight text-primary">
-          Bienvenido de nuevo
+          ¡Hola de nuevo!
         </h1>
-        <p className="text-muted-foreground">
-          Esto es lo que tienes pendiente para hoy.
+        <p className="text-muted-foreground text-lg">
+          Hoy es un gran día para avanzar en tus metas.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-primary">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Tareas Pendientes</CardTitle>
-            <CheckCircle2 className="w-4 h-4 text-primary" />
+            <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Tareas Hoy</CardTitle>
+            <CheckCircle2 className="w-5 h-5 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingTasks}</div>
-            <p className="text-xs text-muted-foreground">Enfócate en completarlas hoy</p>
+            <div className="text-3xl font-bold">{pendingTasks}</div>
+            <p className="text-[10px] text-muted-foreground mt-1">Pendientes de completar</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-accent">
+        <Card className="border-l-4 border-l-accent shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Facturas por Pagar</CardTitle>
-            <DollarSign className="w-4 h-4 text-accent" />
+            <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Finanzas</CardTitle>
+            <DollarSign className="w-5 h-5 text-accent" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${pendingBills.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Monto total pendiente</p>
+            <div className="text-3xl font-bold">${pendingBills.toLocaleString()}</div>
+            <p className="text-[10px] text-muted-foreground mt-1">Total por pagar</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-orange-500">
+        <Card className="border-l-4 border-l-orange-500 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Estado General</CardTitle>
-            <Zap className="w-4 h-4 text-orange-500" />
+            <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Racha</CardTitle>
+            <Flame className="w-5 h-5 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Productivo</div>
-            <p className="text-xs text-muted-foreground">¡Sigue así!</p>
+            <div className="text-3xl font-bold">Iniciado</div>
+            <p className="text-[10px] text-muted-foreground mt-1">¡Sigue construyendo hábitos!</p>
           </CardContent>
         </Card>
 
-        <Card className="border-l-4 border-l-primary">
+        <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Lista de Compra</CardTitle>
-            <ShoppingCart className="w-4 h-4 text-primary" />
+            <CardTitle className="text-xs font-bold uppercase text-muted-foreground">Calendario</CardTitle>
+            <CalendarIcon className="w-5 h-5 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Activa</div>
-            <p className="text-xs text-muted-foreground">Revisa tus pendientes</p>
+            <div className="text-3xl font-bold">Activo</div>
+            <p className="text-[10px] text-muted-foreground mt-1">Revisa tu agenda</p>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="font-headline font-semibold">Resumen de Actividad</CardTitle>
-            <Link href="/calendar">
-              <Button variant="ghost" size="sm" className="gap-2">
-                Ver Agenda <ArrowRight className="w-4 h-4" />
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-secondary/30 flex flex-row items-center justify-between border-b">
+            <CardTitle className="text-lg font-headline font-bold text-primary flex items-center gap-2">
+              <Zap className="w-5 h-5" /> Tareas Urgentes
+            </CardTitle>
+            <Link href="/tasks">
+              <Button variant="link" size="sm" className="text-primary font-bold">
+                Ver todas
               </Button>
             </Link>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="pt-6 space-y-4">
              {pendingTasks === 0 ? (
-               <div className="py-8 text-center text-muted-foreground bg-muted/10 rounded-lg">
-                 ¡Todo al día! No tienes tareas pendientes.
+               <div className="py-12 text-center text-muted-foreground bg-muted/5 rounded-xl border-2 border-dashed flex flex-col items-center gap-2">
+                 <CheckCircle2 className="w-10 h-10 opacity-20" />
+                 <p className="font-medium">No hay tareas para hoy</p>
+                 <Link href="/tasks">
+                   <Button size="sm" variant="outline" className="mt-2">Crear nueva tarea</Button>
+                 </Link>
                </div>
              ) : (
-               tasks?.filter((t: any) => !t.isCompleted).slice(0, 3).map((task: any) => (
-                <div key={task.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-secondary/50 transition-colors">
-                  <div className="flex flex-col">
-                    <span className="font-medium">{task.title}</span>
-                    <span className="text-xs text-muted-foreground">Prioridad {task.priority}</span>
+               tasks?.filter((t: any) => !t.isCompleted).slice(0, 4).map((task: any) => (
+                <div key={task.id} className="flex items-center justify-between p-4 rounded-xl border bg-card hover:bg-secondary/20 transition-all group">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2 h-2 rounded-full ${task.priority === 'Alta' ? 'bg-red-500' : 'bg-orange-400'}`} />
+                    <span className="font-medium group-hover:text-primary transition-colors">{task.title}</span>
                   </div>
-                  <Badge variant={task.priority === "Alta" ? "destructive" : "secondary"}>
+                  <Badge variant="outline" className="text-[10px] font-bold uppercase">
                     {task.priority}
                   </Badge>
                 </div>
@@ -125,28 +132,32 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="font-headline font-semibold">Accesos Rápidos</CardTitle>
+          <CardHeader className="border-b">
+            <CardTitle className="text-lg font-headline font-bold">Accesos Rápidos</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
-            <Link href="/grocery" className="w-full">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <ShoppingCart className="w-5 h-5" /> Compras
+          <CardContent className="pt-6 grid grid-cols-2 gap-4">
+            <Link href="/grocery">
+              <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
+                <ShoppingCart className="w-6 h-6 text-primary" />
+                <span className="font-bold text-xs uppercase tracking-wider">Mercado IA</span>
               </Button>
             </Link>
-            <Link href="/tasks" className="w-full">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <CheckCircle2 className="w-5 h-5" /> Tareas
+            <Link href="/calendar">
+              <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
+                <CalendarIcon className="w-6 h-6 text-primary" />
+                <span className="font-bold text-xs uppercase tracking-wider">Mi Agenda</span>
               </Button>
             </Link>
-            <Link href="/notes" className="w-full">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <Zap className="w-5 h-5" /> Notas
+            <Link href="/notes">
+              <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
+                <Zap className="w-6 h-6 text-primary" />
+                <span className="font-bold text-xs uppercase tracking-wider">Mis Notas</span>
               </Button>
             </Link>
-            <Link href="/habits" className="w-full">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <Flame className="w-5 h-5" /> Hábitos
+            <Link href="/habits">
+              <Button variant="outline" className="w-full h-24 flex-col gap-3 rounded-2xl hover:border-primary hover:bg-primary/5 transition-all">
+                <Flame className="w-6 h-6 text-primary" />
+                <span className="font-bold text-xs uppercase tracking-wider">Hábitos</span>
               </Button>
             </Link>
           </CardContent>
