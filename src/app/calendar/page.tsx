@@ -87,7 +87,7 @@ export default function CalendarPage() {
     const events: any[] = [];
 
     tasks?.forEach(task => {
-      const date = task.dueDate?.seconds ? new Date(task.dueDate.seconds * 1000) : parseISO(task.dueDate);
+      const date = task.dueDate?.seconds ? new Date(task.dueDate.seconds * 1000) : (task.dueDate ? parseISO(task.dueDate) : new Date());
       events.push({
         ...task,
         type: 'task',
@@ -98,7 +98,7 @@ export default function CalendarPage() {
     });
 
     bills?.forEach(bill => {
-      const date = bill.dueDate?.seconds ? new Date(bill.dueDate.seconds * 1000) : parseISO(bill.dueDate);
+      const date = bill.dueDate?.seconds ? new Date(bill.dueDate.seconds * 1000) : (bill.dueDate ? parseISO(bill.dueDate) : new Date());
       events.push({
         ...bill,
         type: 'bill',
@@ -267,68 +267,72 @@ export default function CalendarPage() {
       {/* Panel de Detalle / Edición */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl h-[60vh]">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <div className={cn("w-3 h-3 rounded-full", selectedEvent?.color)} />
-              {selectedEvent?.title}
-            </SheetTitle>
-            <SheetDescription>
-              Detalles de la {selectedEvent?.type === 'task' ? 'tarea' : 'factura'} programada.
-            </SheetDescription>
-          </SheetHeader>
+          {selectedEvent && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="flex items-center gap-2">
+                  <div className={cn("w-3 h-3 rounded-full", selectedEvent.color)} />
+                  {selectedEvent.title}
+                </SheetTitle>
+                <SheetDescription>
+                  Detalles de la {selectedEvent.type === 'task' ? 'tarea' : 'factura'} programada.
+                </SheetDescription>
+              </SheetHeader>
 
-          <div className="py-6 space-y-6">
-            <div className="flex items-center gap-4 text-sm">
-              <div className="p-2 bg-muted rounded-full">
-                <Clock className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-semibold">Fecha y Hora</p>
-                <p className="text-muted-foreground">
-                  {selectedEvent && format(selectedEvent.date, "PPPP 'a las' p", { locale: es })}
-                </p>
-              </div>
-            </div>
-
-            {selectedEvent?.type === 'task' && (
-              <div className="flex items-center gap-4 text-sm">
-                <div className="p-2 bg-muted rounded-full">
-                  <Tag className="w-5 h-5 text-muted-foreground" />
+              <div className="py-6 space-y-6">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="p-2 bg-muted rounded-full">
+                    <Clock className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Fecha y Hora</p>
+                    <p className="text-muted-foreground">
+                      {selectedEvent.date && format(selectedEvent.date, "PPPP 'a las' p", { locale: es })}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold">Prioridad: {selectedEvent.priority}</p>
-                  <p className="text-muted-foreground">{selectedEvent.description}</p>
+
+                {selectedEvent.type === 'task' && (
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="p-2 bg-muted rounded-full">
+                      <Tag className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">Prioridad: {selectedEvent.priority}</p>
+                      <p className="text-muted-foreground">{selectedEvent.description}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4 pt-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-destructive hover:bg-destructive/10 border-destructive/20"
+                    onClick={handleDeleteEvent}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" /> Eliminar
+                  </Button>
+                  {selectedEvent.type === 'task' ? (
+                    <Button 
+                      className="w-full"
+                      onClick={() => handleUpdateStatus('Completada')}
+                      disabled={selectedEvent.status === 'Completada'}
+                    >
+                      Marcar como Hecha
+                    </Button>
+                  ) : (
+                    <Button 
+                      className="w-full bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => handleUpdateStatus('Pagado')}
+                      disabled={selectedEvent.paymentStatus === 'Pagado'}
+                    >
+                      Marcar como Pagada
+                    </Button>
+                  )}
                 </div>
               </div>
-            )}
-
-            <div className="grid grid-cols-2 gap-4 pt-4">
-              <Button 
-                variant="outline" 
-                className="w-full text-destructive hover:bg-destructive/10 border-destructive/20"
-                onClick={handleDeleteEvent}
-              >
-                <Trash2 className="w-4 h-4 mr-2" /> Eliminar
-              </Button>
-              {selectedEvent?.type === 'task' ? (
-                <Button 
-                  className="w-full"
-                  onClick={() => handleUpdateStatus('Completada')}
-                  disabled={selectedEvent.status === 'Completada'}
-                >
-                  Marcar como Hecha
-                </Button>
-              ) : (
-                <Button 
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  onClick={() => handleUpdateStatus('Pagado')}
-                  disabled={selectedEvent.paymentStatus === 'Pagado'}
-                >
-                  Marcar como Pagada
-                </Button>
-              )}
-            </div>
-          </div>
+            </>
+          )}
         </SheetContent>
       </Sheet>
     </div>
