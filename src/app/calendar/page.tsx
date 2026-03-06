@@ -13,14 +13,12 @@ import {
   ChevronRight,
   Trash2,
   Clock,
-  Tag
+  Loader2
 } from "lucide-react";
 import { 
   format, 
   startOfWeek, 
   addDays, 
-  startOfDay,
-  addHours,
   isSameDay,
   parseISO,
   getHours,
@@ -54,9 +52,11 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [today, setToday] = useState<Date | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    setToday(new Date());
   }, []);
 
   const tasksQuery = useMemoFirebase(() => {
@@ -126,7 +126,11 @@ export default function CalendarPage() {
     setIsSheetOpen(false);
   };
 
-  if (!mounted) return null;
+  if (!mounted || !today) return (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] lg:h-screen bg-white overflow-hidden animate-in fade-in duration-500">
@@ -167,7 +171,7 @@ export default function CalendarPage() {
             {weekDays.map((day, i) => (
               <div key={i} className={cn(
                 "flex flex-col items-center py-1 flex-1",
-                format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd') ? "text-blue-600" : (i === 0 ? "text-red-500" : "")
+                format(day, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd') ? "text-blue-600" : (i === 0 ? "text-red-500" : "")
               )}>
                 <span>{format(day, "eee d", { locale: es })}</span>
               </div>
@@ -246,7 +250,7 @@ export default function CalendarPage() {
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl h-[60vh]">
-          {selectedEvent && (
+          {selectedEvent ? (
             <>
               <SheetHeader>
                 <SheetTitle className="flex items-center gap-2">
@@ -299,6 +303,10 @@ export default function CalendarPage() {
                 </div>
               </div>
             </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="w-6 h-6 animate-spin" />
+            </div>
           )}
         </SheetContent>
       </Sheet>
