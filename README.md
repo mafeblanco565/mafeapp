@@ -1,4 +1,3 @@
-
 # 📱 MB FOCUS - Guía de Inicio Rápido
 
 ¡Bienvenido a tu nueva aplicación de productividad! Para que tu app sea funcional, debes activar los servicios en tu panel de Firebase.

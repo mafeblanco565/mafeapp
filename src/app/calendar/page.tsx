@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -43,11 +42,8 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetDescription,
-  SheetFooter
+  SheetDescription
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const HOURS = Array.from({ length: 16 }, (_, i) => i + 7); // De 7 AM a 10 PM
 
@@ -63,7 +59,6 @@ export default function CalendarPage() {
     setMounted(true);
   }, []);
 
-  // Consultas a Firestore
   const tasksQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, "users", user.uid, "tasks");
@@ -78,16 +73,14 @@ export default function CalendarPage() {
   const { data: bills } = useCollection(billsQuery);
 
   const weekDays = useMemo(() => {
-    const start = startOfWeek(currentDate, { weekStartsOn: 0 }); // Domingo
+    const start = startOfWeek(currentDate, { weekStartsOn: 0 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentDate]);
 
-  // Combinar tareas y facturas en eventos de calendario
   const calendarEvents = useMemo(() => {
     const events: any[] = [];
-
     tasks?.forEach(task => {
-      const date = task.dueDate?.seconds ? new Date(task.dueDate.seconds * 1000) : (task.dueDate ? parseISO(task.dueDate) : new Date());
+      const date = task.dueDate ? (typeof task.dueDate === 'string' ? parseISO(task.dueDate) : new Date(task.dueDate.seconds * 1000)) : new Date();
       events.push({
         ...task,
         type: 'task',
@@ -96,9 +89,8 @@ export default function CalendarPage() {
         title: task.title
       });
     });
-
     bills?.forEach(bill => {
-      const date = bill.dueDate?.seconds ? new Date(bill.dueDate.seconds * 1000) : (bill.dueDate ? parseISO(bill.dueDate) : new Date());
+      const date = bill.dueDate ? (typeof bill.dueDate === 'string' ? parseISO(bill.dueDate) : new Date(bill.dueDate.seconds * 1000)) : new Date();
       events.push({
         ...bill,
         type: 'bill',
@@ -107,7 +99,6 @@ export default function CalendarPage() {
         title: `Factura: ${bill.name} ($${bill.amount})`
       });
     });
-
     return events;
   }, [tasks, bills]);
 
@@ -131,7 +122,7 @@ export default function CalendarPage() {
     if (!selectedEvent || !user || !firestore) return;
     const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
     const docRef = doc(firestore, "users", user.uid, path, selectedEvent.id);
-    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' ? { status } : { paymentStatus: status });
+    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' ? { status, isCompleted: status === 'Completada' } : { paymentStatus: status, isPaid: status === 'Pagado' });
     setIsSheetOpen(false);
   };
 
@@ -139,7 +130,6 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] lg:h-screen bg-white overflow-hidden animate-in fade-in duration-500">
-      {/* Header estilo agenda profesional */}
       <div className="flex flex-col border-b">
         <div className="flex items-center justify-between p-2">
           <div className="flex items-center gap-1">
@@ -171,7 +161,6 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* Indicadores de Días de la Semana */}
         <div className="flex items-center bg-[#F5F5F5] border-t border-b py-0.5 px-4 text-[10px] text-gray-400 uppercase font-bold">
           <div className="w-12 text-left">Sem {weekNumber}</div>
           <div className="flex-1 flex justify-around">
@@ -187,10 +176,8 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Grid del Calendario con Bloques de Tiempo */}
       <div className="flex-1 overflow-auto relative bg-[#fafafa]">
         <div className="flex min-w-[700px] h-full">
-          {/* Columna Lateral de Horas */}
           <div className="w-12 border-r bg-[#F9F9F9] sticky left-0 z-20">
             {HOURS.map((hour) => (
               <div key={hour} className="h-20 border-b text-[10px] text-gray-400 flex items-start justify-center pt-1 font-bold">
@@ -199,27 +186,21 @@ export default function CalendarPage() {
             ))}
           </div>
 
-          {/* Columnas de los 7 Días */}
           <div className="flex-1 grid grid-cols-7 relative">
-            {/* Líneas Horizontales de Guía */}
             <div className="absolute inset-0 grid grid-rows-[repeat(16,minmax(0,1fr))] pointer-events-none">
               {HOURS.map((hour) => (
                 <div key={hour} className="border-b border-gray-100 w-full h-20" />
               ))}
             </div>
             
-            {/* Columnas Verticales de Días */}
             {weekDays.map((day, i) => (
               <div key={i} className="border-r border-gray-100 relative last:border-r-0">
-                {/* Renderizar Eventos para este día */}
                 {calendarEvents
                   .filter(event => isSameDay(event.date, day))
                   .map((event) => {
                     const hour = getHours(event.date);
                     const minute = getMinutes(event.date);
-                    // Limitar visualización a las horas mostradas (7 AM - 10 PM)
                     if (hour < 7 || hour > 22) return null;
-                    
                     return (
                       <div
                         key={event.id}
@@ -230,7 +211,7 @@ export default function CalendarPage() {
                         )}
                         style={{
                           top: `${(hour - 7) * 5 + (minute / 60) * 5}rem`,
-                          height: `3rem`, // Altura fija para visualización compacta
+                          height: `3rem`,
                         }}
                       >
                         <div className="flex flex-col h-full justify-between">
@@ -246,7 +227,6 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* Navegación Rápida Flotante */}
       <div className="fixed bottom-24 right-4 flex flex-col gap-2 z-30">
         <Button 
           size="icon" 
@@ -264,7 +244,6 @@ export default function CalendarPage() {
         </Button>
       </div>
 
-      {/* Panel de Detalle / Edición */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-3xl h-[60vh]">
           {selectedEvent && (
@@ -291,18 +270,6 @@ export default function CalendarPage() {
                     </p>
                   </div>
                 </div>
-
-                {selectedEvent.type === 'task' && (
-                  <div className="flex items-center gap-4 text-sm">
-                    <div className="p-2 bg-muted rounded-full">
-                      <Tag className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">Prioridad: {selectedEvent.priority}</p>
-                      <p className="text-muted-foreground">{selectedEvent.description}</p>
-                    </div>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-2 gap-4 pt-4">
                   <Button 
