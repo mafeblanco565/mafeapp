@@ -22,7 +22,7 @@ const items = [
   { name: "Tareas", href: "/tasks", icon: CheckSquare },
   { name: "Facturas", href: "/bills", icon: CreditCard },
   { name: "Hábitos", href: "/habits", icon: Activity },
-  { name: "Calendario", href: "/calendar", icon: Calendar },
+  { name: "Agenda", href: "/calendar", icon: Calendar },
   { name: "Notas", href: "/notes", icon: FileText },
   { name: "Admin", href: "/admin", icon: ShieldCheck },
 ];
@@ -68,8 +68,8 @@ export function MainNav() {
         </nav>
       </div>
 
-      {/* Navegación Inferior para Móvil (Solo visible en pantallas pequeñas) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t z-50 px-2 py-1 flex justify-around items-center h-16 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+      {/* Navegación Inferior para Móvil (Optimizado para pulgar) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-lg border-t z-50 px-2 py-2 flex justify-around items-center h-20 shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
         {items.slice(0, 5).map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
@@ -78,15 +78,27 @@ export function MainNav() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center flex-1 py-1 gap-1 transition-colors",
-                isActive ? "text-primary font-bold" : "text-muted-foreground"
+                "flex flex-col items-center justify-center flex-1 py-1 gap-1.5 transition-all active:scale-90",
+                isActive ? "text-primary scale-110" : "text-muted-foreground opacity-70"
               )}
             >
-              <Icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />
-              <span className="text-[10px] uppercase tracking-tighter">{item.name}</span>
+              <div className={cn(
+                "p-2 rounded-full transition-colors",
+                isActive && "bg-primary/10"
+              )}>
+                <Icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />
+              </div>
+              <span className={cn(
+                "text-[10px] font-bold uppercase tracking-tighter",
+                isActive ? "opacity-100" : "opacity-0 h-0 overflow-hidden transition-all"
+              )}>
+                {item.name}
+              </span>
             </Link>
           );
         })}
+        {/* Botón para abrir el resto del menú en móvil si fuera necesario, 
+            pero por ahora dejamos los 5 principales */}
       </div>
 
       <div className="mt-auto p-6 space-y-1 border-t hidden lg:block">
