@@ -9,7 +9,7 @@ Sin esto, la app se verá pero los botones no guardarán nada:
 1. **Entra en [Firebase Console](https://console.firebase.google.com/)**.
 2. **Selecciona tu proyecto**.
 3. **Authentication**:
-   - En el menú izquierdo ve a **"Build"** -> **"Authentication"**.
+   - Ve a **"Build"** -> **"Authentication"**.
    - Haz clic en **"Get Started"** (Comenzar).
    - Ve a la pestaña **"Sign-in method"**.
    - Busca **"Anonymous"** (Anónimo) al final de la lista.
@@ -17,18 +17,17 @@ Sin esto, la app se verá pero los botones no guardarán nada:
 4. **Firestore Database**:
    - Ve a **"Firestore Database"** -> **"Create database"**.
    - Selecciona una ubicación cercana y elige **"Start in production mode"**.
-   - Ve a la pestaña **"Rules"** (Reglas) y asegúrate de que las reglas coincidan con las de tu archivo `firestore.rules` del proyecto.
 
 ---
 
 ## 🚀 Cómo subir cambios a GitHub
 
-Si ya hiciste el primer paso y quieres actualizar tu app con estas mejoras:
+Si te aparece un error de "No configured push destination", sigue estos pasos en orden:
 
-1. Abre la terminal abajo.
-2. Escribe: `git add .`
-3. Escribe: `git commit -m "Actualización: App funcional con Auth"`
-4. Escribe: `git push`
+1. `git remote add origin https://github.com/mafeblanco565/mafeapp.git`
+2. `git add .`
+3. `git commit -m "Actualización: App funcional"`
+4. `git push -u origin main`
 
 ---
 
