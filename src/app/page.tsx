@@ -14,7 +14,9 @@ import {
   ShoppingCart,
   Calendar as CalendarIcon,
   Plus,
-  Loader2
+  Loader2,
+  FileText,
+  Activity
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
