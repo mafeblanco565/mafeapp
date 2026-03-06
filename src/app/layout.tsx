@@ -4,8 +4,8 @@ import { MainNav } from '@/components/layout/main-nav';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'MB Focus - Productividad Extrema',
-  description: 'Gestiona tus compras, tareas, facturas y hábitos con un enfoque impulsado por IA.',
+  title: 'Focus - Productividad Móvil',
+  description: 'Gestiona tu vida desde cualquier lugar con Focus AI.',
 };
 
 export default function RootLayout({
@@ -19,16 +19,34 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
-      <body className="font-body antialiased bg-background min-h-screen flex">
-        <aside className="w-64 fixed inset-y-0 hidden lg:block z-50">
+      <body className="font-body antialiased bg-[#FDFCF8] min-h-screen flex flex-col lg:flex-row">
+        <aside className="lg:w-64 fixed inset-y-0 left-0 hidden lg:block z-50">
           <MainNav />
         </aside>
-        <main className="flex-1 lg:ml-64 min-h-screen">
-          <div className="container mx-auto p-4 md:p-8 max-w-7xl">
+        
+        {/* Navbar móvil solo para el logo */}
+        <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b sticky top-0 z-40">
+           <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-sm">
+                <div className="w-4 h-4 border-2 border-white rounded-sm rotate-45" />
+              </div>
+              <span className="font-bold text-primary tracking-tight uppercase">Focus</span>
+           </div>
+        </div>
+
+        <main className="flex-1 lg:ml-64 min-h-screen pb-20 lg:pb-0">
+          <div className="container mx-auto p-4 md:p-8 max-w-5xl">
             {children}
           </div>
         </main>
+        
+        {/* La navegación móvil está dentro de MainNav pero renderizada al final en pantallas pequeñas */}
+        <div className="lg:hidden">
+          <MainNav />
+        </div>
+        
         <Toaster />
       </body>
     </html>
