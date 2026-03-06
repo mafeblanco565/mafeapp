@@ -1,0 +1,621 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the system. This entity is primarily used for establishing ownership relationships with other data entities, assuming user authentication and detailed profile management are handled by an external system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity, provided by the external authentication system."
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "GroceryList": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GroceryList",
+      "type": "object",
+      "description": "A customizable list of grocery items for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the GroceryList entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this grocery list. (Relationship: User 1:N GroceryList)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the grocery list (e.g., 'Weekly Shopping', 'Party Supplies')."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the grocery list was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the grocery list was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GroceryItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "GroceryItem",
+      "type": "object",
+      "description": "An individual item within a grocery list, including its quantity and purchase status.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the GroceryItem entity."
+        },
+        "groceryListId": {
+          "type": "string",
+          "description": "Reference to the GroceryList this item belongs to. (Relationship: GroceryList 1:N GroceryItem)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the grocery item (e.g., 'Milk', 'Eggs')."
+        },
+        "quantity": {
+          "type": "string",
+          "description": "The quantity or amount of the item (e.g., '1 gallon', '2 loaves')."
+        },
+        "isPurchased": {
+          "type": "boolean",
+          "description": "Indicates whether the item has been marked as purchased."
+        },
+        "suggestedByAI": {
+          "type": "boolean",
+          "description": "Indicates if this grocery item was suggested by the AI-powered tool."
+        },
+        "purchasedAt": {
+          "type": "string",
+          "description": "Timestamp when the item was marked as purchased. Null if not yet purchased.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the grocery item was added to the list.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the grocery item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "groceryListId",
+        "name",
+        "quantity",
+        "isPurchased",
+        "suggestedByAI",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Task": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Task",
+      "type": "object",
+      "description": "An individual task with priority, due date, and status, manageable for tracking and calendar view.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Task entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this task. (Relationship: User 1:N Task)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title or short description of the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the task."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date when the task is due.",
+          "format": "date-time"
+        },
+        "priority": {
+          "type": "string",
+          "description": "The priority level of the task (e.g., 'Low', 'Medium', 'High')."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the task (e.g., 'Pending', 'Completed', 'Overdue')."
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Indicates whether the task has been completed."
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp when the task was completed. Null if not yet completed.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the task was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the task was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "description",
+        "dueDate",
+        "priority",
+        "status",
+        "isCompleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "BillCategory": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BillCategory",
+      "type": "object",
+      "description": "A category for organizing financial bills (e.g., 'Rent', 'Utilities').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the BillCategory entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this bill category. (Relationship: User 1:N BillCategory). Allows for user-defined categories."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the bill category (e.g., 'Rent', 'Credit Card', 'Subscription')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the bill category."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "description"
+      ]
+    },
+    "Bill": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Bill",
+      "type": "object",
+      "description": "A financial bill with amount, due date, category, and payment status, for tracking and calendar view.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Bill entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this bill. (Relationship: User 1:N Bill)"
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Reference to the BillCategory this bill belongs to. (Relationship: BillCategory 1:N Bill)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name or brief description of the bill (e.g., 'Electricity Bill', 'Credit Card Statement')."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The monetary amount of the bill."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date when the bill is due.",
+          "format": "date-time"
+        },
+        "paymentStatus": {
+          "type": "string",
+          "description": "The current payment status of the bill (e.g., 'Pending', 'Paid', 'Overdue')."
+        },
+        "isPaid": {
+          "type": "boolean",
+          "description": "Indicates whether the bill has been paid."
+        },
+        "paidAt": {
+          "type": "string",
+          "description": "Timestamp when the bill was paid. Null if not yet paid.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the bill was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the bill was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "categoryId",
+        "name",
+        "amount",
+        "dueDate",
+        "paymentStatus",
+        "isPaid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Habit": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Habit",
+      "type": "object",
+      "description": "A daily habit that a user wants to track for personal development.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Habit entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this habit. (Relationship: User 1:N Habit)"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the habit (e.g., 'Drink 8 glasses of water', 'Read 15 minutes')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the habit."
+        },
+        "startDate": {
+          "type": "string",
+          "description": "The date when the user started tracking this habit.",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the habit was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the habit was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "description",
+        "startDate",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "HabitLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "HabitLog",
+      "type": "object",
+      "description": "A daily log entry for a user's habit, indicating completion status for a specific date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the HabitLog entity."
+        },
+        "habitId": {
+          "type": "string",
+          "description": "Reference to the Habit this log entry belongs to. (Relationship: Habit 1:N HabitLog)"
+        },
+        "logDate": {
+          "type": "string",
+          "description": "The specific date for this habit log entry.",
+          "format": "date"
+        },
+        "isCompleted": {
+          "type": "boolean",
+          "description": "Indicates whether the habit was completed on the logDate."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes or reflections for this habit log entry."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the habit log entry was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the habit log entry was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "habitId",
+        "logDate",
+        "isCompleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Note": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Note",
+      "type": "object",
+      "description": "A simple note for capturing quick ideas and information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Note entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the User who owns this note. (Relationship: User 1:N Note)"
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the note."
+        },
+        "content": {
+          "type": "string",
+          "description": "The free-form text content of the note."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the note was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the note was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "content",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data. The document ID `{userId}` directly corresponds to the authenticated user's UID (request.auth.uid). Allows for optional storage of user-specific preferences or public profile information beyond authentication."
+        }
+      },
+      {
+        "path": "/users/{userId}/groceryLists/{groceryListId}",
+        "definition": {
+          "entityName": "GroceryList",
+          "schema": {
+            "$ref": "#/backend/entities/GroceryList"
+          },
+          "description": "Stores individual grocery lists created by a user. The `userId` in the path segment `{userId}` must match `groceryList.userId` and `request.auth.uid` for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this grocery list."
+            },
+            {
+              "name": "groceryListId",
+              "description": "The unique identifier for the specific GroceryList."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/groceryLists/{groceryListId}/groceryItems/{groceryItemId}",
+        "definition": {
+          "entityName": "GroceryItem",
+          "schema": {
+            "$ref": "#/backend/entities/GroceryItem"
+          },
+          "description": "Stores individual grocery items belonging to a specific grocery list. Includes denormalized `userId` for authorization independence, ensuring `request.auth.uid` can be verified directly against the document and path.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns the parent grocery list and this item."
+            },
+            {
+              "name": "groceryListId",
+              "description": "The unique identifier for the parent GroceryList."
+            },
+            {
+              "name": "groceryItemId",
+              "description": "The unique identifier for the specific GroceryItem."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/tasks/{taskId}",
+        "definition": {
+          "entityName": "Task",
+          "schema": {
+            "$ref": "#/backend/entities/Task"
+          },
+          "description": "Stores tasks created by a user. The `userId` in the path segment `{userId}` must match `task.userId` and `request.auth.uid` for authorization. This structure supports efficient querying for the calendar view.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this task."
+            },
+            {
+              "name": "taskId",
+              "description": "The unique identifier for the specific Task."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/billCategories/{billCategoryId}",
+        "definition": {
+          "entityName": "BillCategory",
+          "schema": {
+            "$ref": "#/backend/entities/BillCategory"
+          },
+          "description": "Stores user-defined categories for financial bills. The `userId` in the path segment `{userId}` must match `billCategory.userId` and `request.auth.uid` for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this bill category."
+            },
+            {
+              "name": "billCategoryId",
+              "description": "The unique identifier for the specific BillCategory."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/bills/{billId}",
+        "definition": {
+          "entityName": "Bill",
+          "schema": {
+            "$ref": "#/backend/entities/Bill"
+          },
+          "description": "Stores financial bills for a user. The `userId` in the path segment `{userId}` must match `bill.userId` and `request.auth.uid` for authorization. This structure supports efficient querying for the calendar view.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this bill."
+            },
+            {
+              "name": "billId",
+              "description": "The unique identifier for the specific Bill."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/habits/{habitId}",
+        "definition": {
+          "entityName": "Habit",
+          "schema": {
+            "$ref": "#/backend/entities/Habit"
+          },
+          "description": "Stores daily habits defined by a user. The `userId` in the path segment `{userId}` must match `habit.userId` and `request.auth.uid` for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this habit."
+            },
+            {
+              "name": "habitId",
+              "description": "The unique identifier for the specific Habit."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/habits/{habitId}/habitLogs/{habitLogId}",
+        "definition": {
+          "entityName": "HabitLog",
+          "schema": {
+            "$ref": "#/backend/entities/HabitLog"
+          },
+          "description": "Stores daily log entries for a specific habit. Includes denormalized `userId` for authorization independence, ensuring `request.auth.uid` can be verified directly against the document and path.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns the parent habit and this log entry."
+            },
+            {
+              "name": "habitId",
+              "description": "The unique identifier for the parent Habit."
+            },
+            {
+              "name": "habitLogId",
+              "description": "The unique identifier for the specific HabitLog entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/notes/{noteId}",
+        "definition": {
+          "entityName": "Note",
+          "schema": {
+            "$ref": "#/backend/entities/Note"
+          },
+          "description": "Stores personal notes created by a user. The `userId` in the path segment `{userId}` must match `note.userId` and `request.auth.uid` for authorization.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the User who owns this note."
+            },
+            {
+              "name": "noteId",
+              "description": "The unique identifier for the specific Note."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/adminRoles/{adminId}",
+        "definition": {
+          "entityName": "AdminRole",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "A dedicated collection for Database Access Control (DBAC) to grant superuser/admin privileges. Documents in this collection simply represent the existence of an admin role for the user whose UID matches `{adminId}`. Used to check if `request.auth.uid` exists in this collection to grant administrative access.",
+          "params": [
+            {
+              "name": "adminId",
+              "description": "The unique identifier (UID) of a user who has been granted administrative privileges."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for MB Focus prioritizes secure, scalable, and debuggable authorization by strictly adhering to Authorization Independence and Structural Segregation principles. All user-specific data is organized under a top-level `/users/{userId}` collection, establishing clear path-based ownership. For example, user tasks are stored at `/users/{userId}/tasks/{taskId}`, ensuring that `request.auth.uid` can be directly compared against the `{userId}` wildcard in the path for all read/write operations.\n\n**Authorization Independence (CRITICAL) via Denormalization:** This design strategically denormalizes the `userId` into subcollection documents that would otherwise depend on their parent's ownership for authorization. Specifically, `GroceryItem` documents (nested under `groceryLists`) and `HabitLog` documents (nested under `habits`) will include the `userId` of the owning user directly within their document data. This eliminates the need for security rules to perform expensive and complex `get()` calls to parent documents to ascertain ownership. Consequently, operations on these subcollection documents become atomic and can be secured with simple `request.auth.uid == resource.data.userId` and `request.auth.uid == userId` (from the path) checks, significantly enhancing rule robustness and performance.\n\n**Structural Segregation (Homogeneous Security Posture):** Each collection (e.g., `/users/{userId}/groceryLists`, `/users/{userId}/tasks`) is designed to hold documents with a uniform security posture – all documents within a user's subcollections are owned by that specific user. This simplifies security rules, as there's no need for complex conditional logic to differentiate access within a single collection based on document content. For instance, all documents in `/users/{userId}/tasks` are exclusively accessible by `request.auth.uid` that matches `{userId}`.\n\n**QAPs (Queries as Permissions):** This structure inherently supports secure `list` operations. For example, to retrieve all tasks for the currently authenticated user, a client application would query `firestore.collection('users').doc(request.auth.uid).collection('tasks')`. Firestore security rules can then easily verify that `request.auth.uid` matches the `userId` segment in the path, implicitly filtering results to only include data owned by the requesting user. This ensures that users can only ever list their own tasks, bills, grocery lists, habits, and notes, satisfying the application's requirement for editing and deleting 'all these activities' securely within their owned scope. The calendar view, which relies on pulling tasks and bills, benefits directly from this structure, allowing efficient queries by `dueDate` within the user's secure data boundary. Global roles for 'Superuser Administration Dashboard' are managed via a dedicated `/adminRoles/{adminId}` collection, enabling existence-based access control without custom claims."
+  }
+}
