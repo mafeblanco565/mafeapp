@@ -1,5 +1,7 @@
+
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,8 @@ import {
   DollarSign,
   ShoppingCart,
   Calendar as CalendarIcon,
-  Plus
+  Plus,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useFirestore, useCollection, useMemoFirebase } from "@/firebase";
@@ -20,6 +23,11 @@ import { collection } from "firebase/firestore";
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const tasksQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -33,6 +41,14 @@ export default function DashboardPage() {
 
   const { data: tasks } = useCollection(tasksQuery);
   const { data: bills } = useCollection(billsQuery);
+
+  if (!mounted) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const pendingTasks = tasks?.filter((t: any) => !t.isCompleted).length || 0;
   const pendingBills = bills?.reduce((acc: number, b: any) => !b.isPaid ? acc + b.amount : acc, 0) || 0;

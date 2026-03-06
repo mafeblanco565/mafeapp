@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,17 @@ import {
   deleteDocumentNonBlocking 
 } from "@/firebase";
 import { collection, doc } from "firebase/firestore";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isValid, parseISO } from "date-fns";
 import { es } from "date-fns/locale";
 
 export default function NotesPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
@@ -70,6 +75,14 @@ export default function NotesPage() {
     const docRef = doc(firestore, "users", user.uid, "notes", id);
     updateDocumentNonBlocking(docRef, { pinned: !currentStatus });
   };
+
+  if (!mounted) {
+    return (
+      <div className="flex justify-center p-12">
+        <Loader2 className="animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-in slide-in-from-top-4 duration-500">
@@ -117,45 +130,53 @@ export default function NotesPage() {
              <p className="text-sm">Tus ideas brillantes aparecerán aquí.</p>
           </div>
         ) : (
-          notes.map((note: any) => (
-            <Card key={note.id} className={cn(
-              "group relative hover:shadow-lg transition-all cursor-pointer border-t-4",
-              note.pinned ? "border-t-primary" : "border-t-muted"
-            )}>
-              <CardHeader className="pb-2">
-                <div className="flex items-start justify-between">
-                  <CardTitle className="text-lg font-bold leading-tight line-clamp-2">
-                    {note.title}
-                  </CardTitle>
-                  <button 
-                    onClick={() => togglePin(note.id, note.pinned)}
-                    className={cn(
-                      "transition-opacity",
-                      note.pinned ? "text-primary opacity-100" : "text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100"
-                    )}
+          notes.map((note: any) => {
+            let noteDate = new Date();
+            try {
+              const parsed = typeof note.updatedAt === 'string' ? parseISO(note.updatedAt) : new Date(note.updatedAt.seconds * 1000);
+              if (isValid(parsed)) noteDate = parsed;
+            } catch (e) {}
+
+            return (
+              <Card key={note.id} className={cn(
+                "group relative hover:shadow-lg transition-all cursor-pointer border-t-4",
+                note.pinned ? "border-t-primary" : "border-t-muted"
+              )}>
+                <CardHeader className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <CardTitle className="text-lg font-bold leading-tight line-clamp-2">
+                      {note.title}
+                    </CardTitle>
+                    <button 
+                      onClick={() => togglePin(note.id, note.pinned)}
+                      className={cn(
+                        "transition-opacity",
+                        note.pinned ? "text-primary opacity-100" : "text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100"
+                      )}
+                    >
+                      <Pin className={cn("w-4 h-4", note.pinned && "fill-current")} />
+                    </button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
+                    {note.content}
+                  </p>
+                </CardContent>
+                <CardFooter className="flex items-center justify-between pt-0 text-[10px] text-muted-foreground font-bold uppercase">
+                  <span>{formatDistanceToNow(noteDate, { addSuffix: true, locale: es })}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="w-8 h-8 opacity-0 group-hover:opacity-100 text-destructive"
+                    onClick={() => removeNote(note.id)}
                   >
-                    <Pin className={cn("w-4 h-4", note.pinned && "fill-current")} />
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
-                  {note.content}
-                </p>
-              </CardContent>
-              <CardFooter className="flex items-center justify-between pt-0 text-[10px] text-muted-foreground font-bold uppercase">
-                <span>{formatDistanceToNow(new Date(note.updatedAt), { addSuffix: true, locale: es })}</span>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="w-8 h-8 opacity-0 group-hover:opacity-100 text-destructive"
-                  onClick={() => removeNote(note.id)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </CardFooter>
-            </Card>
-          ))
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>

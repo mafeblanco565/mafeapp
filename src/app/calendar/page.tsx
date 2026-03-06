@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -22,7 +23,8 @@ import {
   isSameDay,
   parseISO,
   getHours,
-  getMinutes
+  getMinutes,
+  isValid
 } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -80,7 +82,12 @@ export default function CalendarPage() {
   const calendarEvents = useMemo(() => {
     const events: any[] = [];
     tasks?.forEach(task => {
-      const date = task.dueDate ? (typeof task.dueDate === 'string' ? parseISO(task.dueDate) : new Date(task.dueDate.seconds * 1000)) : new Date();
+      let date = new Date();
+      try {
+        const parsed = task.dueDate ? (typeof task.dueDate === 'string' ? parseISO(task.dueDate) : new Date(task.dueDate.seconds * 1000)) : new Date();
+        if (isValid(parsed)) date = parsed;
+      } catch (e) {}
+      
       events.push({
         ...task,
         type: 'task',
@@ -90,7 +97,12 @@ export default function CalendarPage() {
       });
     });
     bills?.forEach(bill => {
-      const date = bill.dueDate ? (typeof bill.dueDate === 'string' ? parseISO(bill.dueDate) : new Date(bill.dueDate.seconds * 1000)) : new Date();
+      let date = new Date();
+      try {
+        const parsed = bill.dueDate ? (typeof bill.dueDate === 'string' ? parseISO(bill.dueDate) : new Date(bill.dueDate.seconds * 1000)) : new Date();
+        if (isValid(parsed)) date = parsed;
+      } catch (e) {}
+
       events.push({
         ...bill,
         type: 'bill',
@@ -204,7 +216,7 @@ export default function CalendarPage() {
                   .map((event) => {
                     const hour = getHours(event.date);
                     const minute = getMinutes(event.date);
-                    if (hour < 7 || hour > 22) return null;
+                    if (hour < 7 || hour > 22 || isNaN(hour)) return null;
                     return (
                       <div
                         key={event.id}
@@ -270,7 +282,7 @@ export default function CalendarPage() {
                   <div>
                     <p className="font-semibold">Fecha y Hora</p>
                     <p className="text-muted-foreground">
-                      {selectedEvent.date && format(selectedEvent.date, "PPPP 'a las' p", { locale: es })}
+                      {selectedEvent.date && isValid(selectedEvent.date) && format(selectedEvent.date, "PPPP 'a las' p", { locale: es })}
                     </p>
                   </div>
                 </div>
