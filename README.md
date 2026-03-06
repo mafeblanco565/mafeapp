@@ -18,28 +18,27 @@
 - **Base de Datos & Auth**: [Firebase](https://firebase.google.com/) (Firestore & Authentication)
 - **IA**: [Google Genkit](https://firebase.google.com/docs/genkit) con Gemini 2.5 Flash.
 - **UI/UX**: [Tailwind CSS](https://tailwindcss.com/) + [Shadcn/UI](https://ui.shadcn.com/) + [Lucide Icons](https://lucide.dev/).
-- **Despliegue**: Optimizado para [Firebase App Hosting](https://firebase.google.com/docs/app-hosting).
 
-## 📦 Configuración
+## 📱 Optimización Móvil
 
-1. **Clonar el repositorio:**
-   ```bash
-   git clone [URL-DE-TU-REPOSITORIO]
-   ```
+La aplicación utiliza un enfoque **Mobile-First** con navegación por menú de hamburguesa superior y controles accesibles para el uso con una sola mano.
 
-2. **Instalar dependencias:**
+## 🚀 Despliegue en Vercel
+
+1. **Sube tu código a GitHub**.
+2. **Conecta tu repositorio en Vercel**: Ve a [Vercel](https://vercel.com/) e importa tu proyecto.
+3. **Variables de Entorno**: Asegúrate de añadir las siguientes variables en el panel de Vercel si decides no usar el archivo `src/firebase/config.ts` directamente:
+   - `GOOGLE_GENAI_API_KEY`: Tu clave de API para Gemini.
+4. **Build Settings**: Vercel detectará automáticamente que es un proyecto de Next.js.
+
+## 📦 Desarrollo Local
+
+1. **Instalar dependencias:**
    ```bash
    npm install
    ```
 
-3. **Variables de Entorno:**
-   Configura tus credenciales de Firebase en `src/firebase/config.ts` y asegúrate de tener una `GOOGLE_GENAI_API_KEY` válida si ejecutas Genkit localmente.
-
-4. **Desarrollo:**
+2. **Ejecutar en desarrollo:**
    ```bash
    npm run dev
    ```
-
-## 📱 Optimización Móvil
-
-La aplicación ha sido construida con un enfoque **Mobile-First**, utilizando una navegación por menú de hamburguesa superior y controles accesibles para el uso con una sola mano.
