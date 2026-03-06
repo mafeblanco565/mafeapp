@@ -10,7 +10,8 @@ import {
   Plus,
   Loader2,
   Trash2,
-  CheckCircle2
+  CheckCircle2,
+  Info
 } from "lucide-react";
 import { 
   format, 
@@ -62,8 +63,8 @@ export default function CalendarPage() {
     return collection(firestore, "users", user.uid, "bills");
   }, [firestore, user]);
 
-  const { data: tasks } = useCollection(tasksQuery);
-  const { data: bills } = useCollection(billsQuery);
+  const { data: tasks, isLoading: tasksLoading } = useCollection(tasksQuery);
+  const { data: bills, isLoading: billsLoading } = useCollection(billsQuery);
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentDate, { weekStartsOn: 1 });
@@ -123,27 +124,8 @@ export default function CalendarPage() {
   const prevWeek = () => setCurrentDate(addDays(currentDate, -7));
   const nextWeek = () => setCurrentDate(addDays(currentDate, 7));
 
-  const handleDeleteEvent = () => {
-    if (!selectedEvent || !user || !firestore) return;
-    const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
-    const docRef = doc(firestore, "users", user.uid, path, selectedEvent.id);
-    deleteDocumentNonBlocking(docRef);
-    setIsSheetOpen(false);
-  };
-
-  const handleUpdateStatus = (status: string) => {
-    if (!selectedEvent || !user || !firestore) return;
-    const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
-    const docRef = doc(firestore, "users", user.uid, path, selectedEvent.id);
-    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' 
-      ? { status, isCompleted: status === 'Completada', updatedAt: new Date().toISOString() } 
-      : { paymentStatus: status, isPaid: status === 'Pagado', updatedAt: new Date().toISOString() }
-    );
-    setIsSheetOpen(false);
-  };
-
   if (!mounted) return (
-    <div className="flex items-center justify-center h-[60vh]">
+    <div className="flex items-center justify-center min-h-[60vh]">
       <Loader2 className="w-8 h-8 animate-spin text-primary" />
     </div>
   );
@@ -151,27 +133,27 @@ export default function CalendarPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2 uppercase">
+        <h1 className="text-3xl font-headline font-bold text-primary flex items-center gap-2 uppercase tracking-tighter">
           <CalendarIcon className="w-8 h-8" />
           Agenda Semanal
         </h1>
-        <p className="text-muted-foreground text-sm font-bold">Tus compromisos diarios de un vistazo.</p>
+        <p className="text-muted-foreground text-sm font-bold uppercase opacity-60">Visualización de tus próximos objetivos.</p>
       </div>
 
-      <div className="flex items-center justify-between bg-white p-4 rounded-3xl border-none shadow-sm">
+      <div className="flex items-center justify-between bg-white p-4 rounded-[2rem] border shadow-sm">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={goToToday} className="font-bold rounded-xl uppercase text-xs">Hoy</Button>
+          <Button variant="outline" size="sm" onClick={goToToday} className="font-bold rounded-xl uppercase text-[10px] h-8">Hoy</Button>
           <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={prevWeek}><ChevronLeft className="h-5 w-5" /></Button>
-            <Button variant="ghost" size="icon" onClick={nextWeek}><ChevronRight className="h-5 w-5" /></Button>
+            <Button variant="ghost" size="icon" onClick={prevWeek} className="h-8 w-8"><ChevronLeft className="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon" onClick={nextWeek} className="h-8 w-8"><ChevronRight className="h-4 w-4" /></Button>
           </div>
-          <h2 className="text-md font-bold text-primary ml-2 uppercase tracking-tight">
+          <h2 className="text-sm font-bold text-primary ml-2 uppercase tracking-tight">
             {format(currentDate, "MMMM yyyy", { locale: es })}
           </h2>
         </div>
         <Link href="/tasks">
-          <Button size="sm" className="rounded-full gap-2 font-bold uppercase text-xs">
-            <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Nueva Tarea</span>
+          <Button size="sm" className="rounded-full gap-2 font-bold uppercase text-[10px] h-8 px-4">
+            <Plus className="w-3 h-3" /> Nueva Tarea
           </Button>
         </Link>
       </div>
@@ -183,33 +165,36 @@ export default function CalendarPage() {
           
           return (
             <div key={i} className={cn(
-              "flex flex-col min-h-[140px] bg-white rounded-2xl border-none shadow-sm overflow-hidden transition-all",
-              isToday ? "ring-2 ring-primary ring-inset" : ""
+              "flex flex-col min-h-[160px] bg-white rounded-3xl border shadow-sm overflow-hidden transition-all",
+              isToday ? "ring-2 ring-primary ring-inset border-transparent" : "border-muted/30"
             )}>
               <div className={cn(
-                "p-2 border-b text-center",
-                isToday ? "bg-primary text-white" : "bg-muted/10"
+                "p-3 border-b text-center",
+                isToday ? "bg-primary text-white" : "bg-muted/5"
               )}>
-                <p className="text-[10px] font-bold uppercase opacity-80">{format(day, "eee", { locale: es })}</p>
-                <p className="text-lg font-bold">{format(day, "d")}</p>
+                <p className="text-[9px] font-bold uppercase opacity-80">{format(day, "eeee", { locale: es })}</p>
+                <p className="text-xl font-bold">{format(day, "d")}</p>
               </div>
               
-              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[220px]">
+              <div className="flex-1 p-2 space-y-1.5 overflow-y-auto max-h-[250px]">
                 {dayEvents.length === 0 ? (
-                  <p className="text-[9px] text-center text-muted-foreground mt-4 italic opacity-40 font-bold uppercase">Sin planes</p>
+                  <div className="flex flex-col items-center justify-center h-full opacity-20 mt-4">
+                    <Info className="w-4 h-4" />
+                    <p className="text-[8px] font-bold uppercase mt-1">Libre</p>
+                  </div>
                 ) : (
                   dayEvents.map((event) => (
-                    <div
+                    <button
                       key={event.id}
                       onClick={() => handleEventClick(event)}
                       className={cn(
-                        "p-2 rounded-xl text-[9px] font-bold text-white shadow-sm cursor-pointer transition-transform hover:scale-[1.03] active:scale-95",
+                        "w-full text-left p-2 rounded-xl text-[9px] font-bold text-white shadow-sm transition-all hover:brightness-110 active:scale-95",
                         event.color,
-                        (event.isCompleted || event.isPaid) && "opacity-40 grayscale-[0.5] line-through"
+                        (event.isCompleted || event.isPaid) && "opacity-30 grayscale line-through"
                       )}
                     >
                       <p className="line-clamp-2 leading-tight uppercase">{event.title}</p>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
@@ -219,44 +204,48 @@ export default function CalendarPage() {
       </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="bottom" className="rounded-t-[3rem] h-[45vh] border-none shadow-2xl">
+        <SheetContent side="bottom" className="rounded-t-[3rem] h-[40vh] border-none shadow-2xl">
           {selectedEvent ? (
-            <div className="max-w-md mx-auto space-y-6 pt-4">
+            <div className="max-w-md mx-auto space-y-8 pt-6">
               <SheetHeader>
-                <SheetTitle className="flex items-center gap-2 text-xl font-bold uppercase">
-                  <div className={cn("w-3 h-3 rounded-full", selectedEvent.color)} />
+                <SheetTitle className="flex items-center gap-3 text-2xl font-bold uppercase tracking-tighter">
+                  <div className={cn("w-4 h-4 rounded-full shadow-inner", selectedEvent.color)} />
                   {selectedEvent.title}
                 </SheetTitle>
-                <SheetDescription className="font-bold text-primary uppercase text-xs">
+                <SheetDescription className="font-bold text-primary uppercase text-xs tracking-widest mt-2">
                   {selectedEvent.displayDate && format(selectedEvent.displayDate, "EEEE d 'de' MMMM", { locale: es })}
                 </SheetDescription>
               </SheetHeader>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <Button 
                   variant="outline" 
-                  className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-2xl font-bold uppercase text-xs h-12"
-                  onClick={handleDeleteEvent}
+                  className="w-full text-destructive border-destructive/20 hover:bg-destructive/5 rounded-2xl font-bold uppercase text-xs h-14"
+                  onClick={() => {
+                    const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
+                    const docRef = doc(firestore!, "users", user!.uid, path, selectedEvent.id);
+                    deleteDocumentNonBlocking(docRef);
+                    setIsSheetOpen(false);
+                  }}
                 >
                   <Trash2 className="w-4 h-4 mr-2" /> Eliminar
                 </Button>
-                {selectedEvent.type === 'task' ? (
-                  <Button 
-                    className="w-full rounded-2xl font-bold uppercase text-xs h-12"
-                    onClick={() => handleUpdateStatus('Completada')}
-                    disabled={selectedEvent.isCompleted}
-                  >
-                    {selectedEvent.isCompleted ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Marcar Hecha"}
-                  </Button>
-                ) : (
-                  <Button 
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 rounded-2xl font-bold uppercase text-xs h-12"
-                    onClick={() => handleUpdateStatus('Pagado')}
-                    disabled={selectedEvent.isPaid}
-                  >
-                    {selectedEvent.isPaid ? <CheckCircle2 className="w-4 h-4 mr-2" /> : "Marcar Pagada"}
-                  </Button>
-                )}
+                <Button 
+                  className="w-full rounded-2xl font-bold uppercase text-xs h-14 shadow-lg"
+                  onClick={() => {
+                    const path = selectedEvent.type === 'task' ? 'tasks' : 'bills';
+                    const docRef = doc(firestore!, "users", user!.uid, path, selectedEvent.id);
+                    updateDocumentNonBlocking(docRef, selectedEvent.type === 'task' 
+                      ? { status: 'Completada', isCompleted: true, updatedAt: new Date().toISOString() } 
+                      : { paymentStatus: 'Pagado', isPaid: true, updatedAt: new Date().toISOString() }
+                    );
+                    setIsSheetOpen(false);
+                  }}
+                  disabled={selectedEvent.isCompleted || selectedEvent.isPaid}
+                >
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  {selectedEvent.isCompleted || selectedEvent.isPaid ? "Completado" : "Marcar Hecho"}
+                </Button>
               </div>
             </div>
           ) : null}

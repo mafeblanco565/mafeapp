@@ -1,10 +1,9 @@
+
 'use server';
 /**
- * @fileOverview Un flujo de Genkit que genera una lista de compras basada en un tema o comida proporcionado por el usuario.
+ * @fileOverview Un flujo de Genkit optimizado para generar listas de compras.
  *
- * - generateGroceryList - Una función que maneja el proceso de generación de la lista de compras.
- * - GenerateGroceryListInput - El tipo de entrada para la función generateGroceryList.
- * - GenerateGroceryListOutput - El tipo de retorno para la función generateGroceryList.
+ * - generateGroceryList - Función principal para generar ingredientes.
  */
 
 import {ai} from '@/ai/genkit';
@@ -17,9 +16,9 @@ export type GenerateGroceryListInput = z.infer<typeof GenerateGroceryListInputSc
 
 const GenerateGroceryListOutputSchema = z.object({
   items: z.array(z.object({
-    name: z.string().describe('El nombre del artículo de la compra.'),
+    name: z.string().describe('El nombre del artículo.'),
     quantity: z.string().describe('La cantidad sugerida.'),
-  })).describe('Una lista de artículos de compra sugeridos.'),
+  })).describe('Lista de ingredientes sugeridos.'),
 });
 export type GenerateGroceryListOutput = z.infer<typeof GenerateGroceryListOutputSchema>;
 
@@ -27,8 +26,9 @@ const groceryListPrompt = ai.definePrompt({
   name: 'groceryListPrompt',
   input: {schema: GenerateGroceryListInputSchema},
   output: {schema: GenerateGroceryListOutputSchema},
-  prompt: `Eres un asistente de cocina. Genera una lista de 5 a 8 ingredientes esenciales para cocinar: "{{{theme}}}". 
-Incluye cantidades simples. Responde solo en ESPAÑOL y en formato JSON.`,
+  prompt: `Eres un asistente de cocina experto. Genera una lista de exactamente 6 ingredientes esenciales para cocinar: "{{{theme}}}".
+Incluye cantidades realistas pero simples. 
+IMPORTANTE: Responde solo con el objeto JSON solicitado, sin texto adicional, y todo en ESPAÑOL.`,
 });
 
 const aiGroceryListGeneratorFlow = ai.defineFlow(
@@ -40,7 +40,7 @@ const aiGroceryListGeneratorFlow = ai.defineFlow(
   async (input) => {
     const {output} = await groceryListPrompt(input);
     if (!output || !output.items) {
-      throw new Error('No se pudieron generar sugerencias.');
+      throw new Error('La IA no pudo generar los ingredientes. Reintenta por favor.');
     }
     return output;
   }
