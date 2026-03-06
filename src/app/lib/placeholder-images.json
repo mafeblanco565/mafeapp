@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "grocery-hero",
+      "description": "Fresh produce and grocery items",
+      "imageUrl": "https://picsum.photos/seed/grocery1/800/400",
+      "imageHint": "fresh vegetables"
+    },
+    {
+      "id": "notes-abstract",
+      "description": "Minimalist paper and pen setup",
+      "imageUrl": "https://picsum.photos/seed/notes2/400/300",
+      "imageHint": "writing notebook"
+    }
+  ]
+}
